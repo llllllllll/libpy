@@ -608,7 +608,23 @@ namespace py {
     /**
        Operator overload for unicode objects.
     */
+
+    object operator""_p(char c);
+
+    /**
+       Operator overload for unicode objects.
+    */
     object operator""_p(const char *cs, std::size_t len);
+
+    /**
+       Operator overload for unicode objects.
+    */
+    object operator""_p(wchar_t c);
+
+    /**
+       Operator overload for unicode objects.
+    */
+    object operator""_p(const wchar_t *cs, std::size_t len);
 
     /**
        Operator overload for long objects.
