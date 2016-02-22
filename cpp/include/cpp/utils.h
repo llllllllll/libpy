@@ -45,6 +45,12 @@ namespace pyutils {
 
     class bad_nonnull : public std::exception {};
 
+    /**
+       This function properly propagates CPython exceptions or raises
+       an `AssertionError` if a null check is failed.
+    */
+    void failed_null_check();
+
     inline bool all_nonnull() {
         return true;
     }

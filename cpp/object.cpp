@@ -83,7 +83,7 @@ bool object::iscallable() const {
 
 hash_t object::hash() const {
     if (!is_nonnull()) {
-        PyErr_BadInternalCall();
+        pyutils::failed_null_check();
         return -1;
     }
     return PyObject_Hash(ob);
@@ -95,7 +95,7 @@ int object::istrue() const {
 
 object object::type() const {
     if (!is_nonnull()) {
-        PyErr_BadInternalCall();
+        pyutils::failed_null_check();
         return nullptr;
     }
     return (PyObject*) Py_TYPE(ob);
@@ -108,7 +108,7 @@ ssize_t object::len() const {
 
 ssize_t object::lenhint(ssize_t fallback) const {
     if (!is_nonnull()) {
-        PyErr_BadInternalCall();
+        pyutils::failed_null_check();
         return -1;
     }
     return PyObject_LengthHint(ob, fallback);

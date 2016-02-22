@@ -157,7 +157,7 @@ namespace py{
         template<typename T>
         inline int check(const T &t) {
             if (!t.is_nonnull()) {
-                PyErr_BadInternalCall();
+                pyutils::failed_null_check();
                 return -1;
             }
             return PyTuple_Check(t.ob);
@@ -177,7 +177,7 @@ namespace py{
         template<typename T>
         inline int checkexact(const T &t) {
             if (!t.is_nonnull()) {
-                PyErr_BadInternalCall();
+                pyutils::failed_null_check();
                 return -1;
             }
             return PyTuple_CheckExact(t.ob);

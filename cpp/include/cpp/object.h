@@ -61,7 +61,7 @@ namespace py {
         template<int func(PyObject*)>
         inline int int_unary_func() const {
             if (!is_nonnull()) {
-                PyErr_BadInternalCall();
+                pyutils::failed_null_check();
                 return -1;
             }
             return func(ob);
@@ -70,7 +70,7 @@ namespace py {
         template<PyObject *func(PyObject*)>
         inline object ob_unary_func() const {
             if (!is_nonnull()) {
-                PyErr_BadInternalCall();
+                pyutils::failed_null_check();
                 return nullptr;
             }
             return func(ob);
@@ -79,7 +79,7 @@ namespace py {
         template<int func(PyObject*, PyObject*), typename T>
         inline int int_binary_func(const T &other) const {
             if (!pyutils::all_nonnull(*this, other)) {
-                PyErr_BadInternalCall();
+                pyutils::failed_null_check();
                 return -1;
             }
             return func(ob, other.ob);
@@ -88,7 +88,7 @@ namespace py {
         template<PyObject *func(PyObject*, PyObject*), typename T>
         inline object ob_binary_func(const T &other) const {
             if (!pyutils::all_nonnull(*this, other)) {
-                PyErr_BadInternalCall();
+                pyutils::failed_null_check();
                 return nullptr;
             }
             return func(ob, other.ob);
@@ -171,7 +171,7 @@ namespace py {
         int setattr(const T &attr, const object &value) const {
             // value can be nullptr for delattr
             if (!pyutils::all_nonnull(*this, attr)) {
-                PyErr_BadInternalCall();
+                pyutils::failed_null_check();
                 return -1;
             }
             return PyObject_SetAttr(ob, attr.ob, value.ob);
@@ -409,7 +409,7 @@ namespace py {
         template<typename T, typename U>
         object pow(const T &other, const U &mod) const {
             if (!pyutils::all_nonnull(*this, other, mod)) {
-                PyErr_BadInternalCall();
+                pyutils::failed_null_check();
                 return nullptr;
             }
             return PyNumber_Power(ob, other.ob, mod.ob);
@@ -487,7 +487,7 @@ namespace py {
         int setitem(const T &key, const object &value) const {
             // value.ob can be nullptr for delitem
             if (!pyutils::all_nonnull(*this, key)) {
-                PyErr_BadInternalCall();
+                pyutils::failed_null_check();
                 return -1;
             }
             return PyObject_SetItem(ob, key.ob, value.ob);
@@ -537,7 +537,7 @@ namespace py {
         object call(const T &args, const object &kwargs = nullptr) const {
             // kwargs.ob can be nullptr to mean no keyword arguments
             if (!pyutils::all_nonnull(*this, args)) {
-                PyErr_BadInternalCall();
+                pyutils::failed_null_check();
                 return nullptr;
             }
             return PyObject_Call(ob, args.ob, kwargs.ob);
@@ -590,7 +590,7 @@ namespace py {
     template<typename... Ts>
     object object::operator()(const Ts&... args) const {
         if (!pyutils::all_nonnull(*this, args...)) {
-            PyErr_BadInternalCall();
+            pyutils::failed_null_check();
             return nullptr;
         }
 

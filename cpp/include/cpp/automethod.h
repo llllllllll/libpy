@@ -4,7 +4,8 @@
 
 #include <Python.h>
 
-#include "utils.h"
+#include "cpp/object.h"
+#include "cpp/utils.h"
 
 namespace pyutils {
 
@@ -87,19 +88,14 @@ namespace pyutils {
 #define _cpp_automethod_1(f) _cpp_automethod_2(f, NULL)
 #define _cpp_automethod_dispatch(n, f, doc, macro, ...)  macro
 
-    /* Wrap a C++ function as a python PyMethodDef structure.
+    /**
+       Wrap a C++ function as a python PyMethodDef structure.
 
-       Parameters
-       ----------
-       f : function
-           The function to wrap.
-       doc : const char*, optional
-           The docstring for the function.
-
-       Returns
-       -------
-       m : PyMethodDef
-           The methoddef. */
+       @param func The function to wrap.
+       @param doc  The docstring to use for the function. If this is omitted
+                   the docstring will be None.
+       @return     A `PyMethodDef` structure for the given function.
+    */
 #define automethod(...)                                                 \
     _cpp_automethod_dispatch(                                           \
         ,##__VA_ARGS__,                                                 \

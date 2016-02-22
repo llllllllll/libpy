@@ -33,7 +33,7 @@ t::object &t::object::operator=(t::object &&mvfrom) noexcept {
 
 ssize_t t::object::len() const {
     if (!is_nonnull()) {
-        PyErr_BadInternalCall();
+        pyutils::failed_null_check();
         return -1;
     }
     return PyTuple_GET_SIZE(ob);
@@ -41,7 +41,7 @@ ssize_t t::object::len() const {
 
 object t::object::operator[](ssize_t idx) const {
     if (!is_nonnull()) {
-        PyErr_BadInternalCall();
+        pyutils::failed_null_check();
         return nullptr;
     }
     return PyTuple_GET_ITEM(ob, idx);
@@ -60,7 +60,7 @@ object t::object::getitem_checked(ssize_t idx) const {
 
 int t::object::setitem(ssize_t idx, const py::object &value) const {
     if (!is_nonnull()) {
-        PyErr_BadInternalCall();
+        pyutils::failed_null_check();
         return -1;
     }
     PyTuple_SET_ITEM(ob, idx, value.ob);
@@ -69,7 +69,7 @@ int t::object::setitem(ssize_t idx, const py::object &value) const {
 
 int t::object::setitem_checked(ssize_t idx, const py::object &value) const {
     if (!is_nonnull()) {
-        PyErr_BadInternalCall();
+        pyutils::failed_null_check();
         return -1;
     }
     return PyTuple_SetItem(ob, idx, value.ob);
