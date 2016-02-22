@@ -1,7 +1,7 @@
 #pragma once
 #include <tuple>
 
-#include "cpp/object.h"
+#include "libpy/object.h"
 
 namespace py{
     namespace tuple {
@@ -145,7 +145,8 @@ namespace py{
         /* pull in the tuple templates after defining `object` in this namespace
            so that `py::tuple::pack` and `py::tuple::from_tuple`` will return
            `py::tuple::object` instead of `py::object`.
-        #include "cpp/_tuple_templates.h"
+        */
+        #include "libpy/_tuple_templates.h"
 
         /**
            Check if an object is an instance of `tuple`.
@@ -163,7 +164,7 @@ namespace py{
             return PyTuple_Check(t.ob);
         }
 
-        inline int check(const object::nonnull &t) {
+        inline int check(const object::nonnull&) {
             return 1;
         }
 
@@ -183,7 +184,7 @@ namespace py{
             return PyTuple_CheckExact(t.ob);
         }
 
-        inline int checkexact(const object::nonnull &t) {
+        inline int checkexact(const object::nonnull&) {
             return 1;
         }
     }

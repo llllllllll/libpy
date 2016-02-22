@@ -4,8 +4,8 @@
 
 #include <Python.h>
 
-#include "cpp/object.h"
-#include "cpp/utils.h"
+#include "libpy/object.h"
+#include "libpy/utils.h"
 
 namespace pyutils {
 
@@ -79,14 +79,14 @@ namespace pyutils {
         return apply(impl, std::tuple_cat(std::make_tuple(self), parsed_args));
     }
 
-#define _cpp_automethod_2(f, doc) (PyMethodDef {                        \
+#define _libpy_automethod_2(f, doc) (PyMethodDef {                      \
         #f,                                                             \
         (PyCFunction) pyutils::_automethodwrapper<decltype(f), f>,      \
         METH_VARARGS,                                                   \
         doc,                                                            \
     })
-#define _cpp_automethod_1(f) _cpp_automethod_2(f, NULL)
-#define _cpp_automethod_dispatch(n, f, doc, macro, ...)  macro
+#define _libpy_automethod_1(f) _libpy_automethod_2(f, NULL)
+#define _libpy_automethod_dispatch(n, f, doc, macro, ...)  macro
 
     /**
        Wrap a C++ function as a python PyMethodDef structure.
@@ -97,9 +97,9 @@ namespace pyutils {
        @return     A `PyMethodDef` structure for the given function.
     */
 #define automethod(...)                                                 \
-    _cpp_automethod_dispatch(                                           \
+    _libpy_automethod_dispatch(                                         \
         ,##__VA_ARGS__,                                                 \
-        _cpp_automethod_2(__VA_ARGS__),                                 \
-        _cpp_automethod_1(__VA_ARGS__),                                 \
+        _libpy_automethod_2(__VA_ARGS__),                               \
+        _libpy_automethod_1(__VA_ARGS__),                               \
     )
 }

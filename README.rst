@@ -1,4 +1,4 @@
-``cpp``
+``libpy``
 
 A C++ framework for working with the CPython API. This is a work in progress.
 
@@ -9,7 +9,7 @@ overloading should provide an experience much closer to writing python directly
 while still giving us the speed and control of C++.
 
 For example, lets look at the following code in Python and then see how to adapt
-this in C and with `cpp`.
+this in C and with ``libpy``.
 
 .. code-block:: python
 
@@ -70,7 +70,7 @@ With normal CPython API.
    resut;
 
 
-With ``cpp`` this is simply:
+With ``libpy`` this is simply:
 
 .. code-block:: c++
 

@@ -1,7 +1,7 @@
 #pragma once
 #include <Python.h>
 
-#include "utils.h"
+#include "libpy/utils.h"
 
 #define HAVE_MATMUL (PY_VERSION_HEX >= 0x03500000)
 
@@ -584,7 +584,7 @@ namespace py {
     };
 
     namespace _tuple_templates{
-        #include "cpp/_tuple_templates.h"
+        #include "libpy/_tuple_templates.h"
     }
 
     template<typename... Ts>

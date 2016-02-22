@@ -1,5 +1,5 @@
-#include "cpp/tuple.h"
-#include "cpp/utils.h"
+#include "libpy/tuple.h"
+#include "libpy/utils.h"
 
 using namespace py;
 namespace t = tuple;
@@ -55,7 +55,7 @@ object t::object::getitem_checked(ssize_t idx) const {
     if (!is_nonnull()) {
         return nullptr;
     }
-    PyTuple_GetItem(ob, idx);
+    return PyTuple_GetItem(ob, idx);
 }
 
 int t::object::setitem(ssize_t idx, const py::object &value) const {
