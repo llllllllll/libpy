@@ -2,4 +2,6 @@
 html/*
 
 # scratch file for testing linking
-scratch.cpp
+scratch.cc
+*.o
+*.so*
