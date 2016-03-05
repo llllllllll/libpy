@@ -4,11 +4,11 @@ MINOR_VERSION=0
 MICRO_VERSION=0
 CFLAGS=-std=gnu++14 -Wall -Wextra -O3
 LDFLAGS=
-SOURCES=$(wildcard src/*.cpp)
+SOURCES=$(wildcard src/*.cc)
 PYTHON_INCLUDE=$(shell python -c 'import distutils as d;print(d.sysconfig_get_python_inc())')
 INCLUDE_DIRS=include/ $(PYTHON_INCLUDE)
 INCLUDE=$(foreach d,$(INCLUDE_DIRS), -I$d)
-OBJECTS=$(SOURCES:.cpp=.o)
+OBJECTS=$(SOURCES:.cc=.o)
 LIBRARY=libpy
 SONAME=$(LIBRARY).so.$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
 
@@ -18,7 +18,7 @@ $(SONAME): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -shared -Wl,-soname,$(SONAME) -o $(SONAME)
 	ln -s $(SONAME) $(LIBRARY).so
 
-.cpp.o:
+.cc.o:
 	$(CC) $(CFLAGS) $(INCLUDE) -fPIC -c $< -o $@
 
 clean:
