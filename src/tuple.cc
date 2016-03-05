@@ -12,11 +12,12 @@ t::object::object(PyObject *pob) :
     py::object(PyTuple_Check(pob) ? pob : nullptr) {}
 
 t::object::object(const py::object &pob) :
-    py::object(PyTuple_Check(pob.ob) ? pob : nullptr) {}
+    py::object(PyTuple_Check((PyObject*) pob) ? pob : nullptr) {}
 
-t::object::object(const t::object &cpfrom) : py::object(cpfrom.ob) {}
+t::object::object(const t::object &cpfrom) : py::object((PyObject*) cpfrom) {}
 
-t::object::object(t::object &&mvfrom) noexcept : py::object(mvfrom.ob) {
+t::object::object(t::object &&mvfrom) noexcept :
+    py::object((PyObject*) mvfrom) {
     mvfrom.ob = nullptr;
 }
 
@@ -63,7 +64,7 @@ int t::object::setitem(ssize_t idx, const py::object &value) const {
         pyutils::failed_null_check();
         return -1;
     }
-    PyTuple_SET_ITEM(ob, idx, value.ob);
+    PyTuple_SET_ITEM(ob, idx, (PyObject*) value);
     return 0;
 }
 
@@ -72,37 +73,13 @@ int t::object::setitem_checked(ssize_t idx, const py::object &value) const {
         pyutils::failed_null_check();
         return -1;
     }
-    return PyTuple_SetItem(ob, idx, value.ob);
+    return PyTuple_SetItem(ob, idx, (PyObject*) value);
 }
 
-t::object::nonnull t::object::as_nonnull() const {
+nonnull<t::object> t::object::as_nonnull() const {
     if (!is_nonnull()) {
         throw pyutils::bad_nonnull();
     }
-    return t::object::nonnull(ob);
-}
+    return nonnull<t::object>(ob);
 
-t::object::nonnull::nonnull(PyObject *ob) : t::object(ob) {}
-t::object::nonnull::nonnull(const t::object::nonnull &cpfrom) :
-    t::object(cpfrom.ob) {}
-t::object::nonnull::nonnull(t::object::nonnull &&mvfrom) noexcept :
-    t::object(mvfrom.ob) {
-    mvfrom.ob = nullptr;
-}
-
-t::object::nonnull &t::object::nonnull::operator=(
-    const t::object::nonnull &cpfrom) {
-    t::object::nonnull tmp(cpfrom);
-    return (*this = std::move(tmp));
-}
-
-t::object::nonnull &t::object::nonnull::operator=(
-    t::object::nonnull &&mvfrom) noexcept{
-    ob = mvfrom.ob;
-    mvfrom.ob = nullptr;
-    return *this;
-}
-
-ssize_t t::object::nonnull::len() const {
-    return PyTuple_GET_SIZE(ob);
 }

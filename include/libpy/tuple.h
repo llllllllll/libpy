@@ -100,7 +100,6 @@ namespace py{
             int setitem_checked(ssize_t idx, const py::object &value) const;
 
 
-            class nonnull;
 
             /**
                Coerce to a `nonnull` object.
@@ -109,37 +108,7 @@ namespace py{
                @throws pyutil::bad_nonnull Thrown when `ob == nullptr`.
                @return this converted to a `nonnull` object.
             */
-            nonnull as_nonnull() const;
-        };
-
-
-        /**
-           A `py::tuple::object` where `ob` is known to be nonnull.
-           This is used to skip null checks for performance.
-
-           This class should be used where users want to trade the ability to
-           write a nested expression for perfomance.
-        */
-        class object::nonnull : public object {
-        private:
-            nonnull() = delete;
-            explicit nonnull(PyObject *ob);
-            nonnull(const nonnull&);
-            nonnull(nonnull&&) noexcept;
-
-        public:
-            friend class object;
-            nonnull &operator=(const nonnull &cpfrom);
-            nonnull &operator=(nonnull &&mvfrom) noexcept;
-
-            /**
-               Get the length of the object.
-
-               This is equivalent to `len(this)`.
-
-               @return The length of the object or -1 if an exception occured.
-            */
-            ssize_t len() const;
+            nonnull<object> as_nonnull() const;
         };
 
         /* pull in the tuple templates after defining `object` in this namespace
@@ -164,7 +133,7 @@ namespace py{
             return PyTuple_Check(t.ob);
         }
 
-        inline int check(const object::nonnull&) {
+        inline int check(const nonnull<object>&) {
             return 1;
         }
 
@@ -184,8 +153,52 @@ namespace py{
             return PyTuple_CheckExact(t.ob);
         }
 
-        inline int checkexact(const object::nonnull&) {
+        inline int checkexact(const nonnull<object>&) {
             return 1;
         }
     }
+
+    /**
+       A `py::tuple::object` where `ob` is known to be nonnull.
+       This is used to skip null checks for performance.
+
+       This class should be used where users want to trade the ability to
+       write a nested expression for perfomance.
+    */
+    template<>
+    class nonnull<tuple::object> : public tuple::object {
+    private:
+        nonnull() = delete;
+        explicit nonnull(PyObject *ob) : tuple::object(ob) {}
+        nonnull(const nonnull &cpfrom) : tuple::object(cpfrom) {}
+        nonnull(nonnull &&mvfrom) noexcept : tuple::object((PyObject*) mvfrom) {
+            mvfrom.ob = nullptr;
+        }
+
+    public:
+        friend class object;
+
+        nonnull &operator=(const nonnull &cpfrom) {
+            nonnull<tuple::object> tmp(cpfrom);
+            return (*this = std::move(tmp));
+        }
+
+        nonnull &operator=(nonnull &&mvfrom) noexcept {
+            ob = mvfrom.ob;
+            mvfrom.ob = nullptr;
+            return *this;
+        }
+
+        /**
+           Get the length of the object.
+
+           This is equivalent to `len(this)`.
+
+           @return The length of the object or -1 if an exception occured.
+        */
+        ssize_t len() const {
+            return PyTuple_GET_SIZE(ob);
+        }
+    };
+
 }

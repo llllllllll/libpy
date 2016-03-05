@@ -218,28 +218,23 @@ const object &object::decref() {
     return *this;
 }
 
-object::nonnull object::as_nonnull() const {
+Py_ssize_t object::refcnt() const {
+    if (!is_nonnull()) {
+        return -1;
+    }
+    return Py_REFCNT(ob);
+}
+
+nonnull<object> object::as_nonnull() const {
     if (!is_nonnull()) {
         throw pyutils::bad_nonnull();
     }
-    return nonnull(ob);
+    return nonnull<object>(ob);
 }
 
-object::nonnull::nonnull(PyObject *pob) : object(pob) {}
 
-object::nonnull::nonnull(const nonnull &cpfrom) : object(cpfrom.ob) {}
-
-object::nonnull::nonnull(nonnull &&mvfrom) noexcept : object(mvfrom.ob) {
-    mvfrom.ob = nullptr;
-}
-
-object::nonnull &object::nonnull::operator=(const object::nonnull &cpfrom) {
-    object::nonnull tmp(cpfrom);
-    return (*this = std::move(tmp));
-}
-
-object::nonnull &object::nonnull::operator=(object::nonnull &&mvfrom) noexcept {
-    ob = mvfrom.ob;
-    mvfrom.ob = nullptr;
-    return *this;
+tmpref<object> object::as_tmpref() && {
+    tmpref<object> ret(ob);
+    ob = nullptr;
+    return ret;
 }

@@ -47,11 +47,73 @@ namespace py {
     extern object Ellipsis;
 
     /**
+       An object where `ob` is known to be nonnull.
+       This is used to skip null checks for performance.
+
+       This class should be used where users want to trade the ability to
+       write a nested expression for perfomance.
+    */
+    template<typename T>
+    class nonnull : public T {
+    protected:
+        nonnull() = delete;
+        explicit nonnull(PyObject *pob) : T(pob) {}
+        nonnull(const nonnull &cpfrom) : T(cpfrom) {}
+        nonnull(nonnull &&mvfrom) noexcept : T(mvfrom) {
+            mvfrom.ob = nullptr;
+        }
+
+    public:
+        friend T;
+
+        nonnull<T> &operator=(const nonnull &cpfrom) {
+            nonnull<T> tmp(cpfrom);
+            return (*this = std::move(tmp));
+        }
+
+        nonnull<T> &operator=(nonnull &&mvfrom) noexcept {
+            this.ob = mvfrom.ob;
+            mvfrom.ob = nullptr;
+            return *this;
+        }
+
+        inline bool is_nonnull() {
+            return true;
+        }
+    };
+
+    /**
+       An object that holds a temprary reference. This reference will be
+       decremented when the object goes out of scope.
+    */
+    template<typename T>
+    class tmpref : public T {
+    protected:
+        tmpref() = delete;
+
+        tmpref(PyObject *pob) : T(pob) {}
+
+    public:
+        friend T;
+
+        ~tmpref() {
+            if (this->is_nonnull()) {
+                Py_DECREF(this->ob);
+            }
+        }
+    };
+
+    /**
        A wrapper around `PyObject*` to provide a C++ interface to the
        CPython API.
     */
     class object {
     protected:
+        /**
+           The underlying `PyObject*`.
+        */
+        PyObject *ob;
+
         template<compareop opid, typename T>
         inline object t_richcompare(const T &other) const {
             // PyObject_RichCompare does its own nullchecks
@@ -95,10 +157,12 @@ namespace py {
         }
 
     public:
-        /**
-           The underlying `PyObject*`.
-        */
-        PyObject *ob;
+        friend object operator""_p(char c);
+        friend object operator""_p(const char *cs, std::size_t len);
+        friend object operator""_p(wchar_t c);
+        friend object operator""_p(const wchar_t *cs, std::size_t len);
+        friend object operator""_p(unsigned long long l);
+        friend object operator""_p(long double d);
 
         /**
            Default constructor. The underyling pointer will be nullptr.
@@ -557,7 +621,17 @@ namespace py {
         */
         const object &decref();
 
-        // coersion to PyObject*
+        /**
+           Get the ref count of the object.
+           If the object is `nullptr` then this returns a negative value.
+
+           @return The number of references to the underlying object.
+        */
+        Py_ssize_t refcnt() const;
+
+        /**
+           coersion to PyObject*
+        */
         inline operator PyObject *() const {
             return ob;
         }
@@ -571,8 +645,6 @@ namespace py {
             return ob;
         }
 
-        class nonnull;
-
         /**
            Coerce to a `nonnull` object.
 
@@ -580,7 +652,15 @@ namespace py {
            @throws pyutils::bad_nonnull Thrown when `ob == nullptr`.
            @return this converted to a `nonnull` object.
         */
-        nonnull as_nonnull() const;
+        nonnull<object> as_nonnull() const;
+
+        /**
+           Create a temporary reference. This is a reference that will decref
+           the object when it is destroyed.
+
+           @return this converted into a tmpref.
+        */
+        tmpref<object> as_tmpref() &&;
     };
 
     namespace _tuple_templates{
@@ -635,27 +715,4 @@ namespace py {
        Operator overload for float objects.
     */
     object operator""_p(long double d);
-
-    /**
-       A `py::object` where `ob` is known to be nonnull.
-       This is used to skip null checks for performance.
-
-       This class should be used where users want to trade the ability to
-       write a nested expression for perfomance.
-    */
-    class object::nonnull : public object {
-    protected:
-        nonnull() = delete;
-        explicit nonnull(PyObject*);
-        nonnull(const nonnull&);
-        nonnull(nonnull&&) noexcept;
-    public:
-        friend class object;
-        nonnull &operator=(const nonnull&);
-        nonnull &operator=(nonnull&&) noexcept;
-
-        inline bool is_nonnull() {
-            return true;
-        }
-    };
 }
