@@ -5,9 +5,9 @@
 
 using namespace py;
 
-object None = Py_None;
-object NotImplemented = Py_NotImplemented;
-object Ellipsis = Py_Ellipsis;
+object py::None = Py_None;
+object py::NotImplemented = Py_NotImplemented;
+object py::Ellipsis = Py_Ellipsis;
 
 object::object() : ob(nullptr) {}
 

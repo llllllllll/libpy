@@ -16,6 +16,8 @@ SONAME=$(LIBRARY).so.$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
 TESTS=$(wildcard test/test_*.cc) test/main.cc
 TESTRUNNER=test/run
 
+.PHONY: all test clean
+
 all: $(SOURCES) $(SONAME)
 
 $(SONAME): $(OBJECTS)
@@ -27,10 +29,12 @@ $(SONAME): $(OBJECTS)
 .cc.o: $(HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) -fPIC -c $< -o $@
 
-test: all
+test: $(TESTRUNNER)
+	LD_LIBRARY_PATH=. $(TESTRUNNER)
+
+$(TESTRUNNER): all
 	$(CC) $(CFLAGS) $(INCLUDE) $(TESTS) \
 		-L. -lpy -lgtest -lpthread -lpython$(PYTHON_LDVERSION) -o $(TESTRUNNER)
-	LD_LIBRARY_PATH=. $(TESTRUNNER)
 
 clean:
 	rm $(SONAME) $(LIBRARY).so $(OBJECTS) $(TESTRUNNER)
