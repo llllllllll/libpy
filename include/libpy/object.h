@@ -157,12 +157,12 @@ namespace py {
         }
 
     public:
-        friend object operator""_p(char c);
-        friend object operator""_p(const char *cs, std::size_t len);
-        friend object operator""_p(wchar_t c);
-        friend object operator""_p(const wchar_t *cs, std::size_t len);
-        friend object operator""_p(unsigned long long l);
-        friend object operator""_p(long double d);
+        friend const object &operator""_p(char c);
+        friend const object &operator""_p(const char *cs, std::size_t len);
+        friend const object &operator""_p(wchar_t c);
+        friend const object &operator""_p(const wchar_t *cs, std::size_t len);
+        friend const object &operator""_p(unsigned long long l);
+        friend const object &operator""_p(long double d);
 
         /**
            Default constructor. The underyling pointer will be nullptr.
@@ -689,30 +689,30 @@ namespace py {
        Operator overload for unicode objects.
     */
 
-    object operator""_p(char c);
+    const object &operator""_p(char c);
 
     /**
        Operator overload for unicode objects.
     */
-    object operator""_p(const char *cs, std::size_t len);
+    const object &operator""_p(const char *cs, std::size_t len);
 
     /**
        Operator overload for unicode objects.
     */
-    object operator""_p(wchar_t c);
+    const object &operator""_p(wchar_t c);
 
     /**
        Operator overload for unicode objects.
     */
-    object operator""_p(const wchar_t *cs, std::size_t len);
+    const object &operator""_p(const wchar_t *cs, std::size_t len);
 
     /**
        Operator overload for long objects.
     */
-    object operator""_p(unsigned long long l);
+    const object &operator""_p(unsigned long long l);
 
     /**
        Operator overload for float objects.
     */
-    object operator""_p(long double d);
+    const object &operator""_p(long double d);
 }

@@ -19,54 +19,54 @@ object::object(object &&mvfrom) noexcept : ob(mvfrom.ob) {
     mvfrom.ob = nullptr;
 }
 
-object py::operator""_p(char c) {
+const object &py::operator""_p(char c) {
     static std::unordered_map<char, object> cache;
-    object ob = cache[c];
+    object &ob = cache[c];
     if (!ob.is_nonnull()) {
         ob.ob = PyUnicode_FromStringAndSize(&c, 1);
     }
     return ob;
 }
 
-object py::operator""_p(const char *cs, std::size_t len) {
+const object &py::operator""_p(const char *cs, std::size_t len) {
     static std::unordered_map<const char*, object> cache;
-    object ob = cache[cs];
+    object &ob = cache[cs];
     if (!ob.is_nonnull()) {
         ob.ob = PyUnicode_FromStringAndSize(cs, len);
     }
     return ob;
 }
 
-object py::operator""_p(wchar_t c) {
+const object &py::operator""_p(wchar_t c) {
     static std::unordered_map<wchar_t, object> cache;
-    object ob = cache[c];
+    object &ob = cache[c];
     if (!ob.is_nonnull()) {
         ob.ob = PyUnicode_FromWideChar(&c, 1);
     }
     return ob;
 }
 
-object py::operator""_p(const wchar_t *cs, std::size_t len) {
+const object &py::operator""_p(const wchar_t *cs, std::size_t len) {
     static std::unordered_map<const wchar_t*, object> cache;
-    object ob = cache[cs];
+    object &ob = cache[cs];
     if (!ob.is_nonnull()) {
         ob.ob = PyUnicode_FromWideChar(cs, len);
     }
     return ob;
 }
 
-object py::operator""_p(unsigned long long l) {
+const object &py::operator""_p(unsigned long long l) {
     static std::unordered_map<unsigned long long, object> cache;
-    object ob = cache[l];
+    object &ob = cache[l];
     if (!ob.is_nonnull()) {
         ob.ob = PyLong_FromUnsignedLongLong(l);
     }
     return ob;
 }
 
-object py::operator""_p(long double d) {
+const object &py::operator""_p(long double d) {
     static std::unordered_map<long double, object> cache;
-    object ob = cache[d];
+    object &ob = cache[d];
     if (!ob.is_nonnull()) {
         ob.ob = PyFloat_FromDouble(d);
     }
