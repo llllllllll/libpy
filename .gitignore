@@ -1,3 +1,6 @@
+# test runner built with `make test`
+test/run
+
 # doc artifacts
 html/*
 
