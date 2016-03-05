@@ -19,6 +19,10 @@ object::object(object &&mvfrom) noexcept : ob(mvfrom.ob) {
     mvfrom.ob = nullptr;
 }
 
+object::object(tmpref<object> &&mvfrom) noexcept : ob(mvfrom.ob) {
+    mvfrom.ob = nullptr;
+}
+
 const object &py::operator""_p(char c) {
     static std::unordered_map<char, object> cache;
     object &ob = cache[c];

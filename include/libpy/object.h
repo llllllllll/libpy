@@ -166,6 +166,7 @@ namespace py {
         friend const object &operator""_p(const wchar_t *cs, std::size_t len);
         friend const object &operator""_p(unsigned long long l);
         friend const object &operator""_p(long double d);
+        friend tmpref<object>;
 
         /**
            Default constructor. The underyling pointer will be nullptr.

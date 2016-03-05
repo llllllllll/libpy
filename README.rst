@@ -20,59 +20,63 @@ With normal CPython API.
 
 .. code-block:: c
 
-   PyObject *al;
-   PyObject *dot;
-   PyObject *one;
-   PyObject *twopfive;
-   PyObject *idx;
-   PyObject *tmp;
-   PyObject *result;
+   PyObject *f() {
+       PyObject *al;
+       PyObject *dot;
+       PyObject *one;
+       PyObject *twopfive;
+       PyObject *idx;
+       PyObject *tmp;
+       PyObject *result;
 
-   if (!(al = PyUnicode_FromString("ayy.lmao"))) {
-       return NULL;
-   }
+       if (!(al = PyUnicode_FromString("ayy.lmao"))) {
+           return NULL;
+       }
 
-   if (!(dot = PyUnicode_FromString("."))) {
-       Py_DECREF(al);
-       return NULL;
-   }
+       if (!(dot = PyUnicode_FromString("."))) {
+           Py_DECREF(al);
+           return NULL;
+       }
 
-   idx = PyObject_CallMethodObjArgs(al, "find", dot, NULL);
-   Py_DECREF(al)
-   Py_DECREF(dot);
+       idx = PyObject_CallMethodObjArgs(al, "find", dot, NULL);
+       Py_DECREF(al)
+       Py_DECREF(dot);
 
-   if (!idx) {
-       return NULL;
-   }
+       if (!idx) {
+           return NULL;
+       }
 
-   if (!(one = PyLong_FromLong(1))) {
+       if (!(one = PyLong_FromLong(1))) {
+           Py_DECREF(idx);
+           return NULL;
+       }
+
+       tmp = PyNumber_Add(idx, one);
        Py_DECREF(idx);
-       return NULL;
+       Py_DECREF(one);
+
+       if (!tmp) {
+           return NULL;
+       }
+
+       if (!(twopfive = PyFloat_FromDouble(2.5))) {
+           Py_DECREF(tmp);
+           return NULL;
+       }
+
+       result = PyNumber_Add(tmpa, twopfive);
+       Py_DECREF(tmpa);
+       Py_DECREF(twopfive);
+
+       result;
    }
-
-   tmp = PyNumber_Add(idx, one);
-   Py_DECREF(idx);
-   Py_DECREF(one);
-
-   if (!tmp) {
-       return NULL;
-   }
-
-   if (!(twopfive = PyFloat_FromDouble(2.5))) {
-       Py_DECREF(tmp);
-       return NULL;
-   }
-
-   result = PyNumber_Add(tmpa, twopfive);
-   Py_DECREF(tmpa);
-   Py_DECREF(twopfive);
-
-   resut;
 
 
 With ``libpy`` this is simply:
 
 .. code-block:: c++
 
-   using py::operator""_p;
-   return "ayy.lmao"_p.getattr("find"_p)("."_p) + 1_p + 2.5_p;
+   py::object f() {
+       using py::operator""_p;
+       return "ayy.lmao"_p.getattr("find"_p)("."_p) + 1_p + 2.5_p;
+   }
