@@ -10,5 +10,7 @@ py::object f() {
 }
 
 TEST(ReadMe, example) {
+    object ob = f();
+    EXPECT_EQ(ob.refcnt(), 1);
     EXPECT_TRUE((f() == 6.5_p).istrue());
 }
