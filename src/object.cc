@@ -88,19 +88,19 @@ int object::print(FILE *f, int flags) const {
     return PyObject_Print(ob, f, flags);
 }
 
-object object::repr() const {
+tmpref<object> object::repr() const {
     return PyObject_Repr(ob);
 }
 
-object object::ascii() const {
+tmpref<object> object::ascii() const {
     return PyObject_ASCII(ob);
 }
 
-object object::str() const {
+tmpref<object> object::str() const {
     return PyObject_Str(ob);
 }
 
-object object::bytes() const {
+tmpref<object> object::bytes() const {
     return PyObject_Bytes(ob);
 }
 
@@ -141,58 +141,58 @@ ssize_t object::lenhint(ssize_t fallback) const {
     return PyObject_LengthHint(ob, fallback);
 }
 
-object object::dir() const {
+tmpref<object> object::dir() const {
     // PyObject_Dir(NULL) has a very different meaning than expected here
     // so we will raise in that case
     return ob_unary_func<PyObject_Dir>();
 }
 
-object object::iter() const {
+tmpref<object> object::iter() const {
     return ob_unary_func<PyObject_GetIter>();
 }
 
-object object::richcompare(const object &other, compareop opid) const {
+tmpref<object> object::richcompare(const object &other, compareop opid) const {
     // PyObject_RichCompare does its own null checks
     return PyObject_RichCompare(ob, other.ob, opid);
 }
 
-object object::operator<(const object &other) const {
+tmpref<object> object::operator<(const object &other) const {
     return t_richcompare<LT>(other);
 }
 
-object object::operator<=(const object &other) const {
+tmpref<object> object::operator<=(const object &other) const {
     return t_richcompare<LE>(other);
 }
 
-object object::operator==(const object &other) const {
+tmpref<object> object::operator==(const object &other) const {
     return t_richcompare<EQ>(other);
 }
 
-object object::operator!=(const object &other) const {
+tmpref<object> object::operator!=(const object &other) const {
     return t_richcompare<NE>(other);
 }
 
-object object::operator>(const object &other) const {
+tmpref<object> object::operator>(const object &other) const {
     return t_richcompare<GT>(other);
 }
 
-object object::operator>=(const object &other) const {
+tmpref<object> object::operator>=(const object &other) const {
     return t_richcompare<GE>(other);
 }
 
-object object::operator-() const {
+tmpref<object> object::operator-() const {
     return ob_unary_func<PyNumber_Negative>();
 }
 
-object object::operator+() const {
+tmpref<object> object::operator+() const {
     return ob_unary_func<PyNumber_Positive>();
 }
 
-object object::abs() const {
+tmpref<object> object::abs() const {
     return ob_unary_func<PyNumber_Absolute>();
 }
 
-object object::invert() const {
+tmpref<object> object::invert() const {
     return ob_unary_func<PyNumber_Invert>();
 }
 

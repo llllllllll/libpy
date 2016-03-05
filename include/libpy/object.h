@@ -59,9 +59,6 @@ namespace py {
         nonnull() = delete;
         explicit nonnull(PyObject *pob) : T(pob) {}
         nonnull(const nonnull &cpfrom) : T(cpfrom) {}
-        nonnull(nonnull &&mvfrom) noexcept : T(mvfrom) {
-            mvfrom.ob = nullptr;
-        }
 
     public:
         friend T;
@@ -88,18 +85,24 @@ namespace py {
     */
     template<typename T>
     class tmpref : public T {
-    protected:
-        tmpref() = delete;
-
-        tmpref(PyObject *pob) : T(pob) {}
-
     public:
         friend T;
 
+        tmpref() : T(nullptr) {}
+        tmpref(PyObject *pob) : T(pob) {}
+        tmpref(T &&mvfrom) : T(mvfrom) {
+            this->ob = std::move(mvfrom.ob);
+        }
+
+        tmpref<T> as_tmpref() &&{
+            tmpref<T> ret(this->ob);
+            this->ob = nullptr;
+            return ret;
+        }
+
         ~tmpref() {
-            if (this->is_nonnull()) {
-                Py_DECREF(this->ob);
-            }
+            // we don't use is_nonnull() because this might have been claimed
+            Py_XDECREF(this->ob);
         }
     };
 
@@ -115,7 +118,7 @@ namespace py {
         PyObject *ob;
 
         template<compareop opid, typename T>
-        inline object t_richcompare(const T &other) const {
+        inline tmpref<object> t_richcompare(const T &other) const {
             // PyObject_RichCompare does its own nullchecks
             return PyObject_RichCompare(ob, other.ob, opid);
         }
@@ -130,7 +133,7 @@ namespace py {
         }
 
         template<PyObject *func(PyObject*)>
-        inline object ob_unary_func() const {
+        inline tmpref<object> ob_unary_func() const {
             if (!is_nonnull()) {
                 pyutils::failed_null_check();
                 return nullptr;
@@ -148,7 +151,7 @@ namespace py {
         }
 
         template<PyObject *func(PyObject*, PyObject*), typename T>
-        inline object ob_binary_func(const T &other) const {
+        inline tmpref<object> ob_binary_func(const T &other) const {
             if (!pyutils::all_nonnull(*this, other)) {
                 pyutils::failed_null_check();
                 return nullptr;
@@ -177,6 +180,13 @@ namespace py {
         object(PyObject*);
         object(const object&);
         object(object&&) noexcept;
+
+        /**
+           Constructor that claims the reference from a tmpref.
+
+           @param claimfrom The temporary reference to claim.
+        */
+        object(tmpref<object> &&claimfrom) noexcept;
 
         object &operator=(const object&);
         object &operator=(object&&) noexcept;
@@ -216,7 +226,7 @@ namespace py {
                         not exist, or < 0 if an exception occured.
         */
         template<typename T>
-        object getattr(const T &attr) const {
+        tmpref<object> getattr(const T &attr) const {
             return ob_binary_func<PyObject_GetAttr>(attr);
         }
 
@@ -267,7 +277,7 @@ namespace py {
            @see bytes
            @return The repr of the object.
         */
-        object repr() const;
+        tmpref<object> repr() const;
 
         /**
            Compute the repr of the object and escape non ascii characters.
@@ -279,7 +289,7 @@ namespace py {
            @see bytes
            return The ascii representation of the object.
         */
-        object ascii() const;
+        tmpref<object> ascii() const;
 
         /**
            Compute a string representation of the object.
@@ -291,7 +301,7 @@ namespace py {
            @see bytes
            return The str of the object.
         */
-        object str() const;
+        tmpref<object> str() const;
 
         /**
            Compute a bytes representation of the object.
@@ -306,7 +316,7 @@ namespace py {
            @see str
            @return The bytes representation of the object.
         */
-        object bytes() const;
+        tmpref<object> bytes() const;
 
         /**
            Check if the object is a subclass of `cls`
@@ -398,7 +408,7 @@ namespace py {
 
            @return A sorted list of the attributes of the object.
         */
-        object dir() const;
+        tmpref<object> dir() const;
 
         /**
            Get an iterator over the object.
@@ -407,7 +417,7 @@ namespace py {
 
            @return An iterator over the object.
         */
-        object iter() const;
+        tmpref<object> iter() const;
 
         // relational operators
         /**
@@ -423,55 +433,55 @@ namespace py {
            @return      The result of of comparing `this` to `other`
                         with `opid`.
         */
-        object richcompare(const object &other, compareop opid) const;
+        tmpref<object> richcompare(const object &other, compareop opid) const;
 
-        object operator<(const object&) const;
-        object operator<=(const object&) const;
-        object operator==(const  object&) const;
-        object operator!=(const object&) const;
-        object operator>(const object&) const;
-        object operator>=(const object&) const;
+        tmpref<object> operator<(const object&) const;
+        tmpref<object> operator<=(const object&) const;
+        tmpref<object>operator==(const  object&) const;
+        tmpref<object>operator!=(const object&) const;
+        tmpref<object>operator>(const object&) const;
+        tmpref<object>operator>=(const object&) const;
 
         // numeric operators
         template<typename T>
-        object operator+(const T &other) const {
+        tmpref<object> operator+(const T &other) const {
             return ob_binary_func<PyNumber_Add>(other);
         }
 
         template<typename T>
-        object operator-(const T &other) const {
+        tmpref<object> operator-(const T &other) const {
             return ob_binary_func<PyNumber_Subtract>(other);
         }
 
         template<typename T>
-        object operator*(const T &other) const {
+        tmpref<object> operator*(const T &other) const {
             return ob_binary_func<PyNumber_Multiply>(other);
         }
 
 #if CPP_HAVE_MATMUL
         template<typename T>
-        object matmul(const T &other) const {
+        tmpref<object> matmul(const T &other) const {
             return ob_binary_func<PyNumber_MatrixMultiple>(other);
         }
 #endif // CPP_HAVE_MATMUL
 
         template<typename T>
-        object operator/(const T &other) const {
+        tmpref<object> operator/(const T &other) const {
             return ob_binary_func<PyNumber_TrueDivide>(other);
         }
 
         template<typename T>
-        object operator%(const T &other) const {
+        tmpref<object> operator%(const T &other) const {
             return ob_binary_func<PyNumber_Remainder>(other);
         }
 
         template<typename T>
-        object divmod(const T &other) const {
+        tmpref<object> divmod(const T &other) const {
             return ob_binary_func<PyNumber_Divmod>(other);
         }
 
         template<typename T, typename U>
-        object pow(const T &other, const U &mod) const {
+        tmpref<object> pow(const T &other, const U &mod) const {
             if (!pyutils::all_nonnull(*this, other, mod)) {
                 pyutils::failed_null_check();
                 return nullptr;
@@ -479,33 +489,33 @@ namespace py {
             return PyNumber_Power(ob, other.ob, mod.ob);
         }
 
-        object operator-() const;
-        object operator+() const;
-        object abs() const;
-        object invert() const;
+        tmpref<object> operator-() const;
+        tmpref<object> operator+() const;
+        tmpref<object> abs() const;
+        tmpref<object> invert() const;
 
         template<typename T>
-        object operator<<(const T &other) const {
+        tmpref<object> operator<<(const T &other) const {
             return ob_binary_func<PyNumber_Lshift>(other);
         }
 
         template<typename T>
-        object operator>>(const T &other) const {
+        tmpref<object> operator>>(const T &other) const {
             return ob_binary_func<PyNumber_Rshift>(other);
         }
 
         template<typename T>
-        object operator&(const T &other) const {
+        tmpref<object> operator&(const T &other) const {
             return ob_binary_func<PyNumber_And>(other);
         }
 
         template<typename T>
-        object operator^(const T &other) const {
+        tmpref<object> operator^(const T &other) const {
             return ob_binary_func<PyNumber_Xor>(other);
         }
 
         template<typename T>
-        object operator|(const T &other) const {
+        tmpref<object> operator|(const T &other) const {
             return ob_binary_func<PyNumber_Or>(other);
         }
 
@@ -513,16 +523,15 @@ namespace py {
         /**
            Lookup an item in a collection.
 
-           This is equivalent to: `this[key]`.
+           This is equivalent to: `this.getitem(key)`.
            This does not support setitem syntax like: `this[key] = value`.
 
            @param key The key to lookup.
            @return    The value for the given key.
         */
         template<typename T>
-        object operator[](const T &key) const {
-            // alias for getitem
-            return getitem(key);
+        tmpref<object> operator[](const T &key) const {
+            return ob_binary_func<PyObject_GetItem>(key);
         }
 
         /**
@@ -534,7 +543,7 @@ namespace py {
            @return    The value for the given key.
         */
         template<typename T>
-        object getitem(const T &key) const {
+        tmpref<object> getitem(const T &key) const {
             return ob_binary_func<PyObject_GetItem>(key);
         }
 
@@ -584,7 +593,7 @@ namespace py {
                        arguments.
         */
         template<typename... Ts>
-        object operator()(const Ts&... args) const;
+        tmpref<object> operator()(const Ts&... args) const;
 
         /**
            Call an object with a tuple of positional arguments and a mapping
@@ -598,7 +607,9 @@ namespace py {
                          arguments.
         */
         template<typename T>
-        object call(const T &args, const object &kwargs = nullptr) const {
+        tmpref<object> call(const T &args,
+                            const object &kwargs = nullptr) const {
+
             // kwargs.ob can be nullptr to mean no keyword arguments
             if (!pyutils::all_nonnull(*this, args)) {
                 pyutils::failed_null_check();
@@ -668,7 +679,7 @@ namespace py {
     }
 
     template<typename... Ts>
-    object object::operator()(const Ts&... args) const {
+    tmpref<object> object::operator()(const Ts&... args) const {
         if (!pyutils::all_nonnull(*this, args...)) {
             pyutils::failed_null_check();
             return nullptr;

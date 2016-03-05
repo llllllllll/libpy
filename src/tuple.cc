@@ -40,7 +40,7 @@ ssize_t t::object::len() const {
     return PyTuple_GET_SIZE(ob);
 }
 
-object t::object::operator[](ssize_t idx) const {
+PyObject *t::object::ob_getitem(ssize_t idx) const {
     if (!is_nonnull()) {
         pyutils::failed_null_check();
         return nullptr;
@@ -48,11 +48,15 @@ object t::object::operator[](ssize_t idx) const {
     return PyTuple_GET_ITEM(ob, idx);
 }
 
-object t::object::getitem(ssize_t idx) const {
-    return this[idx];
+tmpref<object> t::object::operator[](ssize_t idx) const {
+    return ob_getitem(idx);
 }
 
-object t::object::getitem_checked(ssize_t idx) const {
+tmpref<object> t::object::getitem(ssize_t idx) const {
+    return ob_getitem(idx);
+}
+
+tmpref<object> t::object::getitem_checked(ssize_t idx) const {
     if (!is_nonnull()) {
         return nullptr;
     }
