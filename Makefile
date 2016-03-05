@@ -8,7 +8,7 @@ SOURCES=$(wildcard src/*.cc)
 PYTHON_INCLUDE=$(shell python -c 'import distutils as d;print(d.sysconfig_get_python_inc())')
 PYTHON_LDVERSION=$(shell python -c 'import distutils as d;print(d.sysconfig_get_config_vars("LDVERSION")[0])')
 INCLUDE_DIRS=include/ $(PYTHON_INCLUDE)
-HEADERS=$(wildcard include/*.h)
+HEADERS=$(wildcard include/libpy/*.h)
 INCLUDE=$(foreach d,$(INCLUDE_DIRS), -I$d)
 OBJECTS=$(SOURCES:.cc=.o)
 LIBRARY=libpy
@@ -18,15 +18,15 @@ TESTRUNNER=test/run
 
 .PHONY: all test clean
 
-all: $(SOURCES) $(SONAME)
+all: $(SONAME) $(SONAME)
 
-$(SONAME): $(OBJECTS)
+$(SONAME): $(OBJECTS) $(HEADERS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -shared -Wl,-soname,$(SONAME) -o $(SONAME)
 	touch $(LIBRARY).so
 	rm $(LIBRARY).so
 	ln -s $(SONAME) $(LIBRARY).so
 
-.cc.o: $(HEADERS)
+.cc.o:
 	$(CC) $(CFLAGS) $(INCLUDE) -fPIC -c $< -o $@
 
 test: $(TESTRUNNER)
