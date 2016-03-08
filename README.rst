@@ -1,4 +1,6 @@
+=========
 ``libpy``
+=========
 
 A C++ framework for working with the CPython API. This is a work in progress.
 
@@ -9,14 +11,27 @@ overloading should provide an experience much closer to writing python directly
 while still giving us the speed and control of C++.
 
 For example, lets look at the following code in Python and then see how to adapt
-this in C and with ``libpy``.
+this in ``libpy`` and the normal CPython API.
 
 .. code-block:: python
 
    'ayy.lmao'.find('.') + 1 + 2.5
 
 
-With normal CPython API.
+With ``libpy`` this is almost as expressive as python:
+
+.. code-block:: c++
+
+   py::object f() {
+       using py::operator""_p;
+       return "ayy.lmao"_p.getattr("find"_p)("."_p) + 1_p + 2.5_p;
+   }
+
+
+Here we see some of the features of ``libpy`` like user defined literals for
+python types and operator overloading. We also see that we can write a normal
+expression without manually managing reference counts or explicit null checks.
+Compare that to the verbosity of the normal CPython API.
 
 .. code-block:: c
 
@@ -72,11 +87,28 @@ With normal CPython API.
    }
 
 
-With ``libpy`` this is simply:
+The ``libpy`` version automatically handles all of the null checking and will
+properly forward exceptions. It also manages decrefing the intermediates
+even in the case of failures.
 
-.. code-block:: c++
 
-   py::object f() {
-       using py::operator""_p;
-       return "ayy.lmao"_p.getattr("find"_p)("."_p) + 1_p + 2.5_p;
-   }
+Building
+--------
+
+``libpy`` is meant to be built as a shared object to be linked against by
+extension modules. To build ``libpy.so`` simply run ``make``. This requires a
+C++ compiler capable of building C++14 and has only been tested on GCC 5.3.0 on
+GNU+Linux.
+
+
+Tests
+-----
+
+The tests live in the ``test`` directory in the project root. These are broken
+into seperate files named ``test_*.cc``. The entry point lives in
+``test/main.cc``. To build and run the tests run ``make test``.
+
+License
+-------
+
+``libpy`` is dual licensed under the terms of the LGPLv3 and the GPLv2.
