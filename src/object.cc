@@ -219,8 +219,7 @@ const object &object::decref() {
         // when we dealloc without checking the refcount twice
         if (_Py_DEC_REFTOTAL  _Py_REF_DEBUG_COMMA --(ob)->ob_refcnt != 0) {
             _Py_CHECK_REFCNT(_py_decref_tmp)
-        }
-        else {
+        } else {
             _Py_Dealloc(ob);
             ob = nullptr;
         }
