@@ -77,6 +77,12 @@ const object &py::operator""_p(long double d) {
     return ob;
 }
 
+std::ostream &py::operator<<(std::ostream &stream, const object &ob) {
+    /* We can avoid the null check because this happens in PyUnicode_AsUTF8.
+       When ob is nullptr the result is "<NULL>". */
+    return stream << PyUnicode_AsUTF8(ob.str());
+}
+
 object &object::operator=(const object &cpfrom) {
     object tmp(cpfrom);
     return (*this = std::move(tmp));

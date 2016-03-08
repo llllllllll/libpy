@@ -1,4 +1,6 @@
 #pragma once
+#include <ostream>
+
 #include <Python.h>
 
 #include "libpy/utils.h"
@@ -726,4 +728,16 @@ namespace py {
        Operator overload for float objects.
     */
     const object &operator""_p(long double d);
+
+    /**
+       ostream writing for objects.
+
+       This writes the `str()` of the object.
+       If the object wraps `nullptr` this will write "<NULL>".
+
+       @param stream The output stream to write to.
+       @param ob     The object to write.
+       @return       The new output stream.
+    */
+    std::ostream &operator<<(std::ostream &stream, const object &ob);
 }
