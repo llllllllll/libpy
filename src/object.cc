@@ -5,9 +5,9 @@
 
 using namespace py;
 
-object py::None = Py_None;
-object py::NotImplemented = Py_NotImplemented;
-object py::Ellipsis = Py_Ellipsis;
+const object py::None = Py_None;
+const object py::NotImplemented = Py_NotImplemented;
+const object py::Ellipsis = Py_Ellipsis;
 
 object::object() : ob(nullptr) {}
 
@@ -222,7 +222,7 @@ const object &object::decref() {
     return *this;
 }
 
-Py_ssize_t object::refcnt() const {
+ssize_t object::refcnt() const {
     if (!is_nonnull()) {
         return -1;
     }

@@ -34,17 +34,17 @@ namespace py {
     /**
        `py::object` representating `None` from Python.
     */
-    extern object None;
+    extern const object None;
 
     /**
        `py::object` representating `NotImplemented` from Python.
     */
-    extern object NotImplemented;
+    extern const object NotImplemented;
 
     /**
        `py::object` representating `Ellipsis` or `...` from Python.
     */
-    extern object Ellipsis;
+    extern const object Ellipsis;
 
     /**
        An object where `ob` is known to be nonnull.
@@ -101,8 +101,7 @@ namespace py {
         }
 
         ~tmpref() {
-            // we don't use is_nonnull() because this might have been claimed
-            Py_XDECREF(this->ob);
+            this->decref();
         }
     };
 
@@ -639,7 +638,7 @@ namespace py {
 
            @return The number of references to the underlying object.
         */
-        Py_ssize_t refcnt() const;
+        ssize_t refcnt() const;
 
         /**
            coersion to PyObject*
