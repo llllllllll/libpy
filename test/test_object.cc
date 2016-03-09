@@ -2,12 +2,34 @@
 #include <unordered_map>
 
 #include <gtest/gtest.h>
+#include <Python.h>
 
 #include "libpy/object.h"
 
 using namespace py;
 
-TEST(Object, ostream_nonnull) {
+class Object : public testing::Test {
+protected:
+    object C;
+
+    Object() : C(nullptr) {}
+
+    virtual void SetUp() {
+        PyObject *ns = PyEval_GetBuiltins();
+        this->C = PyRun_String(
+            "type('C', (), {})",
+            Py_eval_input,
+            ns,
+            ns
+        );
+    }
+
+    virtual void TearDown() {
+        this->C.decref();
+    }
+};
+
+TEST_F(Object, ostream_nonnull) {
     std::stringstream stream;
     std::unordered_map<std::string, object> subtests = {
         {"c", 'c'_p},
@@ -32,8 +54,48 @@ TEST(Object, ostream_nonnull) {
     }
 }
 
-TEST(Object, ostream_nullptr) {
+TEST_F(Object, ostream_nullptr) {
     std::stringstream stream;
     stream << object(nullptr);
     EXPECT_EQ(stream.str(), "<NULL>");
+}
+
+TEST_F(Object, hasattr) {
+    object ob = "test"_p;
+    object attrs = ob.dir().iter();
+    tmpref<object> attr;
+
+    while ((attr = attrs.next())) {
+        EXPECT_TRUE(ob.hasattr(attr));
+    }
+    ASSERT_FALSE(PyErr_Occurred());
+
+    for (const auto &attr : {"invalid1"_p, "invalid2"_p}) {
+        EXPECT_FALSE(ob.hasattr(attr));
+    }
+}
+
+TEST_F(Object, getattr) {
+    object ob = "test"_p;
+    object attrs = ob.dir().iter();
+    tmpref<object> attr;
+
+    while ((attr = attrs.next())) {
+        EXPECT_NE((PyObject*) ob.getattr(attr), nullptr);
+    }
+    ASSERT_FALSE(PyErr_Occurred());
+
+    for (const auto &attr : {"invalid1"_p, "invalid2"_p}) {
+        EXPECT_EQ((PyObject*) ob.getattr(attr), nullptr);
+        PyErr_Clear();
+    }
+}
+
+TEST_F(Object, setattr_delattr) {
+    ASSERT_FALSE(this->C.hasattr("test"_p));
+    ASSERT_EQ(this->C.setattr("test"_p, 1_p), 0);
+    EXPECT_TRUE(this->C.hasattr("test"_p));
+    EXPECT_EQ((PyObject*) this->C.getattr("test"_p), (PyObject*) 1_p);
+    ASSERT_EQ(this->C.delattr("test"_p), 0);
+    EXPECT_FALSE(this->C.hasattr("test"_p));
 }
