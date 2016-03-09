@@ -112,3 +112,5 @@ License
 -------
 
 ``libpy`` is dual licensed under the terms of the LGPLv3 and the GPLv2.
+You make choose to use ``libpy`` under the terms of either of these two
+licenses.
