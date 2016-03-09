@@ -161,6 +161,11 @@ tmpref<object> object::iter() const {
     return ob_unary_func<PyObject_GetIter>();
 }
 
+tmpref<object> object::next() const {
+    // NULL is a valid input to PyIter_Next
+    return PyIter_Next(ob);
+}
+
 tmpref<object> object::richcompare(const object &other, compareop opid) const {
     // PyObject_RichCompare does its own null checks
     return PyObject_RichCompare(ob, other.ob, opid);

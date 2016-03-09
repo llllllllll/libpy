@@ -92,7 +92,7 @@ namespace py {
 
         tmpref() : T(nullptr) {}
         tmpref(PyObject *pob) : T(pob) {}
-        tmpref(T &&mvfrom) : T(mvfrom) {
+        tmpref(T &&mvfrom) noexcept : T(mvfrom) {
             this->ob = std::move(mvfrom.ob);
         }
 
@@ -420,6 +420,15 @@ namespace py {
            @return An iterator over the object.
         */
         tmpref<object> iter() const;
+
+        /**
+           Get the next object out of an iterator.
+
+           This is equivalent to `next(this)`.
+
+           @return The next object in the stream or nullptr.
+        */
+        tmpref<object> next() const;
 
         // relational operators
         /**
