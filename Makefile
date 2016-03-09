@@ -18,7 +18,7 @@ TESTRUNNER=test/run
 
 .PHONY: all test clean
 
-all: $(SONAME) $(SONAME)
+all: $(SONAME)
 
 $(SONAME): $(OBJECTS) $(HEADERS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -shared -Wl,-soname,$(SONAME) -o $(SONAME)
@@ -32,7 +32,7 @@ $(SONAME): $(OBJECTS) $(HEADERS)
 test: $(TESTRUNNER)
 	LD_LIBRARY_PATH=. $(TESTRUNNER)
 
-$(TESTRUNNER): all
+$(TESTRUNNER): $(TESTS) $(SONAME)
 	$(CC) $(CFLAGS) $(INCLUDE) $(TESTS) \
 		-L. -lpy -lgtest -lpthread -lpython$(PYTHON_LDVERSION) -o $(TESTRUNNER)
 
