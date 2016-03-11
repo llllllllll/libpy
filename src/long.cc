@@ -48,7 +48,7 @@ void plong::object::long_check() {
         ob = nullptr;
         if (!PyErr_Occurred()) {
             PyErr_SetString(PyExc_TypeError,
-                            "cannot make py::tuple::object from non tuple");
+                            "cannot make py::long::object from non int");
         }
     }
 }
