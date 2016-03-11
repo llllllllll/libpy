@@ -1,4 +1,5 @@
 #include <sstream>
+#include <type_traits>
 #include <unordered_map>
 
 #include <gtest/gtest.h>
@@ -7,6 +8,10 @@
 #include "libpy/libpy.h"
 
 using namespace py;
+
+TEST(Layout, py_object) {
+    EXPECT_TRUE(std::is_standard_layout<object>::value);
+}
 
 class Object : public testing::Test {
 protected:
