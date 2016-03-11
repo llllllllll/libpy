@@ -1,4 +1,4 @@
-#include <typeinfo>
+#include <type_traits>
 
 #include <gtest/gtest.h>
 
@@ -42,10 +42,10 @@ TEST(UserDefinedLiterals, ull) {
     auto n = 10_p;
 
     // check that unsigned long long literals infer as long objects
-    EXPECT_EQ(typeid(n).hash_code(), typeid(plong::object).hash_code());
+    ASSERT_TRUE((std::is_same<decltype(n), plong::object>::value));
 
-    EXPECT_EQ((PyObject*) n.type(), (PyObject*) &PyLong_Type);
     EXPECT_EQ(PyLong_AS_LONG((PyObject*) n), 10);
+    EXPECT_EQ(n.as_long(), 10);
     EXPECT_TRUE((n == 10_p).istrue());
 }
 
