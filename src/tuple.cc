@@ -4,15 +4,17 @@
 using namespace py;
 namespace t = tuple;
 
-const object t::type = object((PyObject*) &PyTuple_Type);
+const object t::type = py::object((PyObject*) &PyTuple_Type);
 
 t::object::object() : py::object() {}
 
-t::object::object(PyObject *pob) :
-    py::object(PyTuple_Check(pob) ? pob : nullptr) {}
+t::object::object(PyObject *pob) : py::object(pob) {
+    tuple_check();
+}
 
-t::object::object(const py::object &pob) :
-    py::object(PyTuple_Check((PyObject*) pob) ? pob : nullptr) {}
+t::object::object(const py::object &pob) : py::object(pob) {
+    tuple_check();
+}
 
 t::object::object(const t::object &cpfrom) : py::object((PyObject*) cpfrom) {}
 
@@ -21,15 +23,14 @@ t::object::object(t::object &&mvfrom) noexcept :
     mvfrom.ob = nullptr;
 }
 
-t::object &t::object::operator=(const t::object &cpfrom) {
-    t::object tmp(cpfrom);
-    return (*this = std::move(tmp));
-}
-
-t::object &t::object::operator=(t::object &&mvfrom) noexcept {
-    ob = mvfrom.ob;
-    mvfrom.ob = nullptr;
-    return *this;
+void t::object::tuple_check() {
+    if (ob && !PyTuple_Check(ob)) {
+        ob = nullptr;
+        if (!PyErr_Occurred()) {
+            PyErr_SetString(PyExc_TypeError,
+                            "cannot make py::tuple::object from non tuple");
+        }
+    }
 }
 
 ssize_t t::object::len() const {
@@ -40,7 +41,7 @@ ssize_t t::object::len() const {
     return PyTuple_GET_SIZE(ob);
 }
 
-PyObject *t::object::ob_getitem(ssize_t idx) const {
+object t::object::operator[](ssize_t idx) const {
     if (!is_nonnull()) {
         pyutils::failed_null_check();
         return nullptr;
@@ -48,15 +49,11 @@ PyObject *t::object::ob_getitem(ssize_t idx) const {
     return PyTuple_GET_ITEM(ob, idx);
 }
 
-tmpref<object> t::object::operator[](ssize_t idx) const {
-    return ob_getitem(idx);
+object t::object::getitem(ssize_t idx) const {
+    return this[idx];
 }
 
-tmpref<object> t::object::getitem(ssize_t idx) const {
-    return ob_getitem(idx);
-}
-
-tmpref<object> t::object::getitem_checked(ssize_t idx) const {
+object t::object::getitem_checked(ssize_t idx) const {
     if (!is_nonnull()) {
         return nullptr;
     }

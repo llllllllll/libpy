@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "libpy/object.h"
+#include "libpy/libpy.h"
 
 using namespace py;
 

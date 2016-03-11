@@ -92,8 +92,33 @@ namespace py {
 
         tmpref() : T(nullptr) {}
         tmpref(PyObject *pob) : T(pob) {}
+
+        /**
+           Copy constructor for tmpref which increfs the input to make the
+           refcounts check out when both objects are destroyed.
+
+           @param cpfrom The object to copy.
+        */
+        tmpref(const T &cpfrom) : T(cpfrom.ob) {
+            this->incref();
+        }
+
         tmpref(T &&mvfrom) noexcept : T(mvfrom) {
             this->ob = std::move(mvfrom.ob);
+        }
+
+        using T::operator=;
+
+        tmpref &operator=(const T &cpfrom) {
+            this->ob = cpfrom.ob;
+            this->incref();
+            return *this;
+        }
+
+        tmpref &operator=(T &&mvfrom) {
+            this->ob = mvfrom.ob;
+            mvfrom.ob = nullptr;
+            return *this;
         }
 
         tmpref<T> as_tmpref() &&{
@@ -165,7 +190,6 @@ namespace py {
         friend const object &operator""_p(const char *cs, std::size_t len);
         friend const object &operator""_p(wchar_t c);
         friend const object &operator""_p(const wchar_t *cs, std::size_t len);
-        friend const object &operator""_p(unsigned long long l);
         friend const object &operator""_p(long double d);
         friend tmpref<object>;
 
@@ -727,11 +751,6 @@ namespace py {
        Operator overload for unicode objects.
     */
     const object &operator""_p(const wchar_t *cs, std::size_t len);
-
-    /**
-       Operator overload for long objects.
-    */
-    const object &operator""_p(unsigned long long l);
 
     /**
        Operator overload for float objects.

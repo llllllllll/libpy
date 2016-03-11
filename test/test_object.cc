@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 #include <Python.h>
 
-#include "libpy/object.h"
+#include "libpy/libpy.h"
 
 using namespace py;
 
@@ -17,7 +17,7 @@ protected:
     virtual void SetUp() {
         PyObject *ns = PyEval_GetBuiltins();
         this->C = PyRun_String(
-            "type('C', (), {})",
+            "type('C', (), {})",  // create a type so that it has a mutable dict
             Py_eval_input,
             ns,
             ns

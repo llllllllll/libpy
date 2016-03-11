@@ -15,18 +15,13 @@ namespace py{
         /**
            A subclass of `py::object` for optional tuples.
         */
-        class object;
         class object : public py::object {
         private:
             /**
-               Get the object as a raw PyObject*.
-
-               This is used to implement `operator[]` and `getitem`.
-
-               @param idx The index to lookup without bounds checking.
-               @return    The object at `idx`.
-             */
-            PyObject *ob_getitem(Py_ssize_t idx) const;
+               Function called to verify that `ob` is a tuple and
+               correctly raise a python exception otherwies.
+            */
+            void tuple_check();
         public:
             /**
                Default constructor. This will set `ob` to nullptr.
@@ -47,8 +42,8 @@ namespace py{
 
             object(const object &cpfrom);
             object(object &&mvfrom) noexcept;
-            object &operator=(const object &cpfrom);
-            object &operator=(object &&mvfrom) noexcept;
+
+            using py::object::operator=;
 
             /**
                Get the length of the object.
@@ -65,12 +60,12 @@ namespace py{
                @param idx The integer index into the tuple.
                @return    The object at index `idx`.
             */
-            tmpref<py::object> operator[](ssize_t idx) const;
+            py::object operator[](ssize_t idx) const;
 
             /**
                Alias for operator[].
             */
-            tmpref<py::object> getitem(ssize_t idx) const;
+            py::object getitem(ssize_t idx) const;
 
             /**
                Get the object at `idx` with bounds checking.
@@ -81,7 +76,7 @@ namespace py{
                @param idx The integer index into the tuple.
                @return    The object at index `idx` if it is in range.
             */
-            tmpref<py::object> getitem_checked(ssize_t idx) const;
+            py::object getitem_checked(ssize_t idx) const;
 
             /**
                Sets an object into a tuple. This should only be used to fill
@@ -108,8 +103,6 @@ namespace py{
                @return      zero on success, non-zero on failure.
             */
             int setitem_checked(ssize_t idx, const py::object &value) const;
-
-
 
             /**
                Coerce to a `nonnull` object.

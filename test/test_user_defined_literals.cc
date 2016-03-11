@@ -1,6 +1,8 @@
+#include <typeinfo>
+
 #include <gtest/gtest.h>
 
-#include "libpy/object.h"
+#include "libpy/libpy.h"
 
 using namespace py;
 
@@ -37,7 +39,11 @@ TEST(UserDefinedLiterals, wstring) {
 }
 
 TEST(UserDefinedLiterals, ull) {
-    object n = 10_p;
+    auto n = 10_p;
+
+    // check that unsigned long long literals infer as long objects
+    EXPECT_EQ(typeid(n).hash_code(), typeid(plong::object).hash_code());
+
     EXPECT_EQ((PyObject*) n.type(), (PyObject*) &PyLong_Type);
     EXPECT_EQ(PyLong_AS_LONG((PyObject*) n), 10);
     EXPECT_TRUE((n == 10_p).istrue());

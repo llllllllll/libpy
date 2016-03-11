@@ -59,15 +59,6 @@ const object &py::operator""_p(const wchar_t *cs, std::size_t len) {
     return ob;
 }
 
-const object &py::operator""_p(unsigned long long l) {
-    static std::unordered_map<unsigned long long, object> cache;
-    object &ob = cache[l];
-    if (!ob.is_nonnull()) {
-        ob.ob = PyLong_FromUnsignedLongLong(l);
-    }
-    return ob;
-}
-
 const object &py::operator""_p(long double d) {
     static std::unordered_map<long double, object> cache;
     object &ob = cache[d];

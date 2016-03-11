@@ -2,7 +2,7 @@ CC=g++
 MAJOR_VERSION=1
 MINOR_VERSION=0
 MICRO_VERSION=0
-CFLAGS=-std=gnu++14 -Wall -Wextra -O3
+CFLAGS=-std=gnu++14 -Wall -Wextra -O3 -g
 LDFLAGS=
 SOURCES=$(wildcard src/*.cc)
 PYTHON_INCLUDE=$(shell python -c 'import distutils as d;print(d.sysconfig_get_python_inc())')
@@ -34,7 +34,8 @@ test: $(TESTRUNNER)
 
 $(TESTRUNNER): $(TESTS) $(SONAME)
 	$(CC) $(CFLAGS) $(INCLUDE) $(TESTS) \
-		-L. -lpy -lgtest -lpthread -lpython$(PYTHON_LDVERSION) -o $(TESTRUNNER)
+		-L. -lpy -lgtest -lpthread -lpython$(PYTHON_LDVERSION) \
+		-o $(TESTRUNNER)
 
 clean:
 	rm $(SONAME) $(LIBRARY).so $(OBJECTS) $(TESTRUNNER)
