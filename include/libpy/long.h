@@ -1,18 +1,20 @@
 #pragma once
 
+#include <type_traits>
+
 #include <libpy/object.h>
 
 namespace py {
-    namespace plong {
+    namespace long_ {
         class object;
     }
 
     /**
        Operator overload for long objects.
     */
-    const plong::object &operator""_p(unsigned long long l);
+    const long_::object &operator""_p(unsigned long long l);
 
-    namespace plong {
+    namespace long_ {
 
         class object : public py::object {
         private:
@@ -46,15 +48,16 @@ namespace py {
             object();
 
             /**
-               Explicit constructor from C++ longs.
+               Constructor from C++ numeric types.
 
-               @param l The long to coerce into a PyLongObject.
+               @param l The numeric type to coerce into a python `int`.
             */
-            explicit object(long l);
-            explicit object(unsigned long l);
-            explicit object(long long l);
-            explicit object(unsigned long long l);
-            explicit object(double l);
+            template<typename L,
+                     typename = std::enable_if<std::is_arithmetic<L>::value> >
+            object(L l) :
+                py::object(std::is_integral<L>::value ?
+                           PyLong_FromUnsignedLongLong((unsigned long long) l) :
+                           PyLong_FromDouble((double) l)) {}
 
             /**
                Constructor from `PyObject*`. If `pob` is not a `tuple` then

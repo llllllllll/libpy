@@ -6,44 +6,34 @@
 
 using namespace py;
 
-const plong::object &py::operator""_p(unsigned long long l) {
-    static std::unordered_map<unsigned long long, plong::object> cache;
-    plong::object &ob = cache[l];
+const long_::object &py::operator""_p(unsigned long long l) {
+    static std::unordered_map<unsigned long long, long_::object> cache;
+    long_::object &ob = cache[l];
     if (!ob.is_nonnull()) {
         ob.ob = PyLong_FromUnsignedLongLong(l);
     }
     return ob;
 }
 
-plong::object::object(long l) : py::object(PyLong_FromLong(l)) {}
+long_::object::object() : py::object(nullptr) {}
 
-plong::object::object(unsigned long l) :
-    py::object(PyLong_FromUnsignedLong(l)) {}
-
-plong::object::object(long long l) : py::object(PyLong_FromLongLong(l)) {}
-
-plong::object::object(unsigned long long l) :
-    py::object(PyLong_FromUnsignedLongLong(l)) {}
-
-plong::object::object() : py::object(nullptr) {}
-
-plong::object::object(PyObject *pob) : py::object(pob) {
+long_::object::object(PyObject *pob) : py::object(pob) {
     long_check();
 }
 
-plong::object::object(const py::object &pob) : py::object(pob) {
+long_::object::object(const py::object &pob) : py::object(pob) {
     long_check();
 }
 
-plong::object::object(const plong::object &cpfrom) :
+long_::object::object(const long_::object &cpfrom) :
     py::object((PyObject*) cpfrom) {}
 
-plong::object::object(plong::object &&mvfrom) noexcept :
+long_::object::object(long_::object &&mvfrom) noexcept :
     py::object((PyObject*) mvfrom) {
     mvfrom.ob = nullptr;
 }
 
-void plong::object::long_check() {
+void long_::object::long_check() {
     if (ob && !PyLong_Check(ob)) {
         ob = nullptr;
         if (!PyErr_Occurred()) {
@@ -53,39 +43,39 @@ void plong::object::long_check() {
     }
 }
 
-long plong::object::as_long() const {
+long long_::object::as_long() const {
     return as_t<long, PyLong_AsLong>();
 }
 
-long plong::object::as_long_and_overflow(int &overflow) const {
+long long_::object::as_long_and_overflow(int &overflow) const {
     return as_t_and_overflow<long, PyLong_AsLongAndOverflow>(overflow);
 }
 
-long long plong::object::as_long_long() const {
+long long long_::object::as_long_long() const {
     return as_t<long long, PyLong_AsLongLong>();
 }
 
 
-long long plong::object::as_long_long_and_overflow(int &overflow) const {
+long long long_::object::as_long_long_and_overflow(int &overflow) const {
     return as_t_and_overflow<long long, PyLong_AsLongLongAndOverflow>(overflow);
 }
 
-ssize_t plong::object::as_ssize_t() const {
+ssize_t long_::object::as_ssize_t() const {
     return as_t<ssize_t, PyLong_AsSsize_t>();
 }
 
-unsigned long plong::object::as_unsigned_long() const {
+unsigned long long_::object::as_unsigned_long() const {
     return as_t<unsigned long, PyLong_AsUnsignedLong>();
 }
 
-std::size_t plong::object::as_size_t() const {
+std::size_t long_::object::as_size_t() const {
     return as_t<std::size_t, PyLong_AsSize_t>();
 }
 
-unsigned long long plong::object::as_unsigned_long_long() const {
+unsigned long long long_::object::as_unsigned_long_long() const {
     return as_t<unsigned long long, PyLong_AsUnsignedLongLong>();
 }
 
-double plong::object::as_double() const {
+double long_::object::as_double() const {
     return as_t<double, PyLong_AsDouble>();
 }
