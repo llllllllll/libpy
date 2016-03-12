@@ -21,12 +21,11 @@ protected:
 
     virtual void SetUp() {
         PyObject *ns = PyEval_GetBuiltins();
-        this->C = PyRun_String(
-            "type('C', (), {})",  // create a type so that it has a mutable dict
-            Py_eval_input,
-            ns,
-            ns
-        );
+        // create a type so that it has a mutable dict
+        this->C = PyRun_String("type('C', (), {})",
+                               Py_eval_input,
+                               ns,
+                               ns);
     }
 
     virtual void TearDown() {
@@ -36,13 +35,10 @@ protected:
 
 TEST_F(Object, ostream_nonnull) {
     std::stringstream stream;
-    std::unordered_map<std::string, object> subtests = {
-        {"c", 'c'_p},
-        {"1", 1_p},
-        {"1.5", 1.5_p},
-        {"test", "test"_p},
-
-    };
+    std::unordered_map<std::string, object> subtests = {{"c", 'c'_p},
+                                                        {"1", 1_p},
+                                                        {"1.5", 1.5_p},
+                                                        {"test", "test"_p}};
 
     for (const auto &kv : subtests) {
         for (const auto &as_nonnull : {false, true}) {
