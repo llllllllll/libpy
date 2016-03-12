@@ -5,8 +5,8 @@ MICRO_VERSION=0
 CFLAGS=-std=gnu++14 -Wall -Wextra -O3 -g
 LDFLAGS=
 SOURCES=$(wildcard src/*.cc)
-PYTHON_INCLUDE=$(shell python -c 'import distutils as d;print(d.sysconfig_get_python_inc())')
-PYTHON_LDVERSION=$(shell python -c 'import distutils as d;print(d.sysconfig_get_config_vars("LDVERSION")[0])')
+PYTHON_INCLUDE=$(shell etc/which_py_include)
+PYTHON_LDVERSION=$(shell etc/which_py_so)
 INCLUDE_DIRS=include/ $(PYTHON_INCLUDE)
 HEADERS=$(wildcard include/libpy/*.h)
 INCLUDE=$(foreach d,$(INCLUDE_DIRS), -I$d)
