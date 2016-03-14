@@ -241,5 +241,5 @@ nonnull<object> object::as_nonnull() const {
 tmpref<object> object::as_tmpref() && {
     tmpref<object> ret(ob);
     ob = nullptr;
-    return ret;
+    return std::move(ret);
 }

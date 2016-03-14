@@ -14,6 +14,7 @@ OBJECTS=$(SOURCES:.cc=.o)
 LIBRARY=libpy
 SONAME=$(LIBRARY).so.$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
 TESTS=$(wildcard test/test_*.cc) test/main.cc
+TEST_HEADERS=$(wildcard test/*.h)
 TESTRUNNER=test/run
 
 .PHONY: all test clean
@@ -32,7 +33,7 @@ $(SONAME): $(OBJECTS) $(HEADERS)
 test: $(TESTRUNNER)
 	LD_LIBRARY_PATH=. $(TESTRUNNER)
 
-$(TESTRUNNER): $(TESTS) $(SONAME)
+$(TESTRUNNER): $(TESTS) $(SONAME) $(TEST_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(TESTS) \
 		-L. -lpy -lgtest -lpthread -lpython$(PYTHON_LDVERSION) \
 		-o $(TESTRUNNER)

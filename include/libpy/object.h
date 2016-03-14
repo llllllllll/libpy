@@ -99,23 +99,27 @@ namespace py {
 
            @param cpfrom The object to copy.
         */
-        tmpref(const T &cpfrom) : T(cpfrom.ob) {
+        tmpref(const tmpref<T> &cpfrom) : T(cpfrom.ob) {
             this->incref();
         }
 
-        tmpref(T &&mvfrom) noexcept : T(mvfrom) {
+        tmpref(tmpref<T> &&mvfrom) noexcept : T(mvfrom) {
             this->ob = std::move(mvfrom.ob);
+        }
+
+        tmpref(T &&mvfrom) : T((PyObject*) mvfrom) {
+            mvfrom.ob = nullptr;
         }
 
         using T::operator=;
 
-        tmpref &operator=(const T &cpfrom) {
+        tmpref &operator=(const tmpref<T> &cpfrom) {
             this->ob = cpfrom.ob;
             this->incref();
             return *this;
         }
 
-        tmpref &operator=(T &&mvfrom) {
+        tmpref &operator=(tmpref<T> &&mvfrom) {
             this->ob = mvfrom.ob;
             mvfrom.ob = nullptr;
             return *this;
@@ -125,6 +129,13 @@ namespace py {
             tmpref<T> ret(this->ob);
             this->ob = nullptr;
             return ret;
+        }
+
+        /**
+           Invalidate a tmpref, setting the internal object to nullptr.
+        */
+        void invalidate() && {
+            this->ob = nullptr;
         }
 
         ~tmpref() {
@@ -728,7 +739,7 @@ namespace py {
 
         object ret = PyObject_Call(ob, pyargs.ob, nullptr);
         pyargs.decref();
-        return ret;
+        return ret.ob;
     }
 
     /**

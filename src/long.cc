@@ -79,3 +79,16 @@ unsigned long long long_::object::as_unsigned_long_long() const {
 double long_::object::as_double() const {
     return as_t<double, PyLong_AsDouble>();
 }
+
+nonnull<long_::object> long_::object::as_nonnull() const {
+    if (!is_nonnull()) {
+        throw pyutils::bad_nonnull();
+    }
+    return nonnull<long_::object>(ob);
+}
+
+tmpref<long_::object> long_::object::as_tmpref() && {
+    tmpref<object> ret(ob);
+    ob = nullptr;
+    return std::move(ret);
+}

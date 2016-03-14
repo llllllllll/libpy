@@ -2,4 +2,4 @@
   (flycheck-gcc-include-path . ("../include"
                                 "../../include"
                                 "/usr/include/python3.5m"))
-  (flycheck-gcc-language-standard . "c++14")))
+  (flycheck-gcc-language-standard . "gnu++14")))

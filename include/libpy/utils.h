@@ -70,4 +70,32 @@ namespace pyutils {
     PyObject *_to_pyobject(const T &a) {
         return (PyObject*) a;
     }
+
+    template<typename T>
+    struct is_unsigned {
+        static constexpr bool value = false;
+    };
+
+    template<>
+    struct is_unsigned<unsigned short> {
+        static constexpr bool value = true;
+    };
+
+    template<>
+    struct is_unsigned<unsigned int> {
+        static constexpr bool value = true;
+    };
+
+    template<>
+    struct is_unsigned<unsigned long> {
+        static constexpr bool value = true;
+    };
+
+    template<>
+    struct is_unsigned<unsigned long long> {
+        static constexpr bool value = true;
+    };
+
+    template<typename T>
+    constexpr bool is_unsigned_v = is_unsigned<T>::value;
 }
