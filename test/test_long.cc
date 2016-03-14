@@ -16,12 +16,11 @@ TEST(Long, default) {
     EXPECT_FALSE(PyErr_Occurred());
 }
 
-#define FROM_NUMERIC_TEST_BASE(type) {          \
-        long_::object n((type) 1);              \
-                                                \
-        EXPECT_EQ(n.as_long(), 1);              \
-        EXPECT_NO_PYTHON_ERR();                 \
-        n.decref();                             \
+#define FROM_NUMERIC_TEST_BASE(type) {                  \
+        auto n = long_::object((type) 1).as_tmpref();   \
+                                                        \
+        EXPECT_EQ(n.as_long(), 1);                      \
+        EXPECT_NO_PYTHON_ERR();                         \
     }
 
 #define FROM_FLOATING_TEST(type)                \
@@ -29,16 +28,15 @@ TEST(Long, default) {
         FROM_NUMERIC_TEST_BASE(type)            \
     }
 
-#define FROM_INTEGRAL_TEST(type)                \
-    TEST(Long, from_ ## type) {                 \
-        FROM_NUMERIC_TEST_BASE(type)            \
-                                                \
-        {                                       \
-            long_::object m((unsigned type) 1); \
-            EXPECT_EQ(m.as_long(), 1);          \
-            EXPECT_NO_PYTHON_ERR();             \
-            m.decref();                         \
-        }                                       \
+#define FROM_INTEGRAL_TEST(type)                                        \
+    TEST(Long, from_ ## type) {                                         \
+        FROM_NUMERIC_TEST_BASE(type)                                    \
+                                                                        \
+        {                                                               \
+            auto n = long_::object((unsigned type) 1).as_tmpref();      \
+            EXPECT_EQ(n.as_long(), 1);                                  \
+            EXPECT_NO_PYTHON_ERR();                                     \
+        }                                                               \
     }
 
 FROM_INTEGRAL_TEST(short)
@@ -53,18 +51,16 @@ FROM_FLOATING_TEST(double)
         std::numeric_limits<R> limits;                                  \
                                                                         \
         for (const auto &n : {0, 1, std::is_unsigned<R>::value ? 2 : -1}) { \
-            long_::object ob(n);                                        \
+            auto ob = long_::object(n).as_tmpref();                     \
                                                                         \
             EXPECT_EQ(ob.method(), n);                                  \
             EXPECT_NO_PYTHON_ERR();                                     \
-            ob.decref();                                                \
         }                                                               \
         for (const auto &n : {limits.min(), limits.max()}) {            \
-            long_::object ob(n);                                        \
+            auto ob = long_::object(n).as_tmpref();                     \
                                                                         \
             EXPECT_LT(ob.method() - n, 0.00000001);                     \
             EXPECT_NO_PYTHON_ERR();                                     \
-            ob.decref();                                                \
         }                                                               \
     }
 
