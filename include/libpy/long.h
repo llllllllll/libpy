@@ -137,10 +137,7 @@ namespace py {
             }
 #endif // CPP_HAVE_MATMUL
 
-            template<typename T>
-            tmpref<maybe_long_t<T>> operator/(const T &other) const {
-                return ob_binary_func<PyNumber_TrueDivide>(other);
-            }
+            // not overriding operator/ because long / long returns a float.
 
             template<typename T>
             tmpref<maybe_long_t<T>> operator%(const T &other) const {
