@@ -94,6 +94,7 @@ AS_NUMERIC_TEST(as_double)
                                                                         \
             EXPECT_EQ(ob.method(overflow), -1);                         \
             EXPECT_NO_PYTHON_ERR();                                     \
+            EXPECT_EQ(overflow, -1);;                                   \
         }                                                               \
                                                                         \
         {                                                               \
@@ -102,6 +103,7 @@ AS_NUMERIC_TEST(as_double)
                                                                         \
             EXPECT_EQ(ob.method(overflow), -1);                         \
             EXPECT_NO_PYTHON_ERR();                                     \
+            EXPECT_EQ(overflow, 1);                                     \
         }                                                               \
     }
 
