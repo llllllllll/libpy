@@ -3,6 +3,8 @@
 #include <tuple>
 #include <utility>
 
+#include <Python.h>
+
 namespace pyutils {
     template<std::size_t n>
     struct Apply {
@@ -51,15 +53,32 @@ namespace pyutils {
     */
     void failed_null_check();
 
+    /**
+       Check if all the inputs not nullptr or py::objects that wrap a nullptr.
+
+       For empty argument lists this is just `true`.
+
+       @return true
+    */
     inline bool all_nonnull() {
         return true;
     }
 
+    /**
+       Check if all the inputs not nullptr or py::objects that wrap a nullptr.
+
+       @return Is the single argument nonnull.
+    */
     template<typename T>
     inline bool all_nonnull(const T &a) {
         return a.is_nonnull();
     }
 
+    /**
+       Check if all the inputs not nullptr or py::objects that wrap a nullptr.
+
+       @return Are all of the arguments nonnull.
+    */
     template<typename T, typename... Ts>
     inline bool all_nonnull(const T &head, const Ts&... tail) {
         return head.is_nonnull() && all_nonnull(tail...);
@@ -70,32 +89,4 @@ namespace pyutils {
     PyObject *_to_pyobject(const T &a) {
         return (PyObject*) a;
     }
-
-    template<typename T>
-    struct is_unsigned {
-        static constexpr bool value = false;
-    };
-
-    template<>
-    struct is_unsigned<unsigned short> {
-        static constexpr bool value = true;
-    };
-
-    template<>
-    struct is_unsigned<unsigned int> {
-        static constexpr bool value = true;
-    };
-
-    template<>
-    struct is_unsigned<unsigned long> {
-        static constexpr bool value = true;
-    };
-
-    template<>
-    struct is_unsigned<unsigned long long> {
-        static constexpr bool value = true;
-    };
-
-    template<typename T>
-    constexpr bool is_unsigned_v = is_unsigned<T>::value;
 }

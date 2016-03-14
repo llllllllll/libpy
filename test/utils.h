@@ -31,3 +31,11 @@
             PyErr_Clear();                              \
         }                                               \
     }(void) 0
+
+/**
+   Demangle a name from typeid(T).name().
+
+   @param name The name from typeid.
+   @return     The demangled named.
+*/
+std::string demangle(const char *name);

@@ -1,5 +1,6 @@
 #include <limits>
 #include <type_traits>
+#include <typeinfo>
 
 #include <gtest/gtest.h>
 
@@ -51,7 +52,7 @@ FROM_FLOATING_TEST(double)
         using R = decltype(long_::object().method());                   \
         std::numeric_limits<R> limits;                                  \
                                                                         \
-        for (const auto &n : {0, 1, pyutils::is_unsigned_v<R> ? 2 : -1}) { \
+        for (const auto &n : {0, 1, std::is_unsigned<R>::value ? 2 : -1}) { \
             long_::object ob(n);                                        \
                                                                         \
             EXPECT_EQ(ob.method(), n);                                  \
@@ -75,21 +76,26 @@ AS_NUMERIC_TEST(as_unsigned_long)
 AS_NUMERIC_TEST(as_unsigned_long_long)
 AS_NUMERIC_TEST(as_double)
 
+
 #define AS_NUMERIC_AND_OVERFLOW_TEST(method)                            \
     TEST(Long, as_ ## method) {                                         \
         using R = decltype(long_::object().method(std::declval<int&>())); \
         std::numeric_limits<R> limits;                                  \
                                                                         \
-        for (const auto &n : {0, 1, pyutils::is_unsigned_v<R> ? 2 : -1}) { \
-            tmpref<long_::object> ob = long_::object(n).as_tmpref() + 1_p; \
+        for (const auto &n : {0, 1, std::is_unsigned<R>::value ? 2 : -1}) { \
+            auto ob = long_::object(n).as_tmpref();                     \
             int overflow;                                               \
                                                                         \
-            EXPECT_EQ(ob.method(overflow), n + 1);                      \
+            EXPECT_EQ((ob + 1_p).method(overflow), n + 1);              \
+            EXPECT_NO_PYTHON_ERR();                                     \
+            EXPECT_EQ(overflow, 0);                                     \
+                                                                        \
+            EXPECT_EQ((ob - 1_p).method(overflow), n - 1);              \
             EXPECT_NO_PYTHON_ERR();                                     \
             EXPECT_EQ(overflow, 0);                                     \
         }                                                               \
         {                                                               \
-            long_::object ob = long_::object(limits.min()) - 1_p;       \
+            auto ob = long_::object(limits.min()).as_tmpref() - 1_p;    \
             int overflow;                                               \
                                                                         \
             EXPECT_EQ(ob.method(overflow), -1);                         \
@@ -98,10 +104,10 @@ AS_NUMERIC_TEST(as_double)
         }                                                               \
                                                                         \
         {                                                               \
-            long_::object ob = long_::object(limits.max()) + 1_p;       \
+            auto ob = long_::object(limits.max()).as_tmpref() + 1_p;    \
             int overflow;                                               \
                                                                         \
-            EXPECT_EQ(ob.method(overflow), -1);                         \
+            EXPECT_EQ(ob.method(overflow), -1);                        \
             EXPECT_NO_PYTHON_ERR();                                     \
             EXPECT_EQ(overflow, 1);                                     \
         }                                                               \

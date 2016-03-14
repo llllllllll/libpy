@@ -16,6 +16,22 @@ namespace py {
 
     namespace long_ {
 
+        class object;
+
+        namespace {
+            /**
+               Template that selects long_::object if O is long_::object else
+               return py::object.
+
+               This will work for subclasses like nonnull or tmpref.
+            */
+            template<typename O>
+            using maybe_long_t = typename std::conditional<
+                std::is_base_of<object, O>::value,
+                O,
+                py::object>::type;
+        }
+
         class object : public py::object {
         private:
             /**
@@ -64,7 +80,7 @@ namespace py {
             explicit object(L l) :
                 py::object(!std::is_integral<L>::value ?
                            PyLong_FromDouble(l) :
-                           pyutils::is_unsigned_v<L> ?
+                           std::is_unsigned<L>::value ?
                            PyLong_FromUnsignedLongLong(l) :
                            PyLong_FromLongLong(l)) {}
 
@@ -98,88 +114,82 @@ namespace py {
 
             nonnull<object> as_nonnull() const;
             tmpref<object> as_tmpref() &&;
+
+            template<typename T>
+            tmpref<maybe_long_t<T>> operator+(const T &other) const {
+                return ob_binary_func<PyNumber_Add>(other);
+            }
+
+            template<typename T>
+            tmpref<maybe_long_t<T>> operator-(const T &other) const {
+                return ob_binary_func<PyNumber_Subtract>(other);
+            }
+
+            template<typename T>
+            tmpref<maybe_long_t<T>> operator*(const T &other) const {
+                return ob_binary_func<PyNumber_Multiply>(other);
+            }
+
+#if CPP_HAVE_MATMUL
+            template<typename T>
+            tmpref<maybe_long_t<T>> matmul(const T &other) const {
+                return ob_binary_func<PyNumber_MatrixMultiple>(other);
+            }
+#endif // CPP_HAVE_MATMUL
+
+            template<typename T>
+            tmpref<maybe_long_t<T>> operator/(const T &other) const {
+                return ob_binary_func<PyNumber_TrueDivide>(other);
+            }
+
+            template<typename T>
+            tmpref<maybe_long_t<T>> operator%(const T &other) const {
+                return ob_binary_func<PyNumber_Remainder>(other);
+            }
+
+            template<typename T>
+            tmpref<maybe_long_t<T>> divmod(const T &other) const {
+                return ob_binary_func<PyNumber_Divmod>(other);
+            }
+
+            template<typename T, typename U>
+            tmpref<maybe_long_t<T>> pow(const T &other, const U &mod) const {
+                if (!pyutils::all_nonnull(*this, other, mod)) {
+                    pyutils::failed_null_check();
+                    return nullptr;
+                }
+                return PyNumber_Power(ob, other.ob, mod.ob);
+            }
+
+            tmpref<object> operator-() const;
+            tmpref<object> operator+() const;
+            tmpref<object> abs() const;
+            tmpref<object> invert() const;
+
+            template<typename T>
+            tmpref<maybe_long_t<T>> operator<<(const T &other) const {
+                return ob_binary_func<PyNumber_Lshift>(other);
+            }
+
+            template<typename T>
+            tmpref<maybe_long_t<T>> operator>>(const T &other) const {
+                return ob_binary_func<PyNumber_Rshift>(other);
+            }
+
+            template<typename T>
+            tmpref<maybe_long_t<T>> operator&(const T &other) const {
+                return ob_binary_func<PyNumber_And>(other);
+            }
+
+            template<typename T>
+            tmpref<maybe_long_t<T>> operator^(const T &other) const {
+                return ob_binary_func<PyNumber_Xor>(other);
+            }
+
+            template<typename T>
+            tmpref<maybe_long_t<T>> operator|(const T &other) const {
+                return ob_binary_func<PyNumber_Or>(other);
+            }
         };
     }
-
-    template<>
-    class tmpref<long_::object> : public long_::object {
-    public:
-        friend long_::object;
-
-        tmpref() : long_::object(nullptr) {}
-        tmpref(PyObject *pob) : long_::object(pob) {}
-
-        /**
-           Copy constructor for tmpref which increfs the input to make the
-           refcounts check out when both objects are destroyed.
-
-           @param cpfrom long_::objecthe object to copy.
-        */
-        tmpref(const tmpref<long_::object> &cpfrom) : long_::object(cpfrom.ob) {
-            this->incref();
-        }
-
-        tmpref(tmpref<long_::object> &&mvfrom) noexcept
-            : long_::object(mvfrom) {
-            std::move(mvfrom).invalidate();
-        }
-
-        tmpref(tmpref<py::object> &&mvfrom) noexcept
-            : long_::object((PyObject*) mvfrom) {
-            std::move(mvfrom).invalidate();
-        }
-
-        tmpref(long_::object &&mvfrom) : long_::object((PyObject*) mvfrom) {
-            mvfrom.ob = nullptr;
-        }
-
-        /**
-           Constructor from C++ numeric types.
-
-           This constructor is not explicit because the tmpref will properly
-           clean itself up if used in an expression.
-
-           @param l The numeric type to coerce into a python `int`.
-        */
-        template<typename L,
-                 typename = std::enable_if_t<std::is_arithmetic<L>::value>>
-        tmpref(L l) :
-            tmpref<object>(!std::is_integral<L>::value ?
-                           PyLong_FromDouble(l) :
-                           pyutils::is_unsigned_v<L> ?
-                           PyLong_FromUnsignedLongLong(l) :
-                           PyLong_FromLongLong(l)) {}
-
-        using long_::object::operator=;
-
-        tmpref &operator=(const tmpref<long_::object> &cpfrom) {
-            this->ob = cpfrom.ob;
-            this->incref();
-            return *this;
-        }
-
-        tmpref &operator=(tmpref<long_::object> &&mvfrom) {
-            this->ob = mvfrom.ob;
-            mvfrom.ob = nullptr;
-            return *this;
-        }
-
-        tmpref<long_::object> as_tmpref() &&{
-            tmpref<long_::object> ret(this->ob);
-            this->ob = nullptr;
-            return ret;
-        }
-
-        /**
-           Invalidate a tmpref, setting the internal object to nullptr.
-        */
-        void invalidate() && {
-            this->ob = nullptr;
-        }
-
-        ~tmpref() {
-            this->decref();
-        }
-
-    };
 }

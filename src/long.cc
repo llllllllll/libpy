@@ -92,3 +92,19 @@ tmpref<long_::object> long_::object::as_tmpref() && {
     ob = nullptr;
     return std::move(ret);
 }
+
+tmpref<long_::object> long_::object::operator-() const {
+    return ob_unary_func<PyNumber_Negative>();
+}
+
+tmpref<long_::object> long_::object::operator+() const {
+    return ob_unary_func<PyNumber_Positive>();
+}
+
+tmpref<long_::object> long_::object::abs() const {
+    return ob_unary_func<PyNumber_Absolute>();
+}
+
+tmpref<long_::object> long_::object::invert() const {
+    return ob_unary_func<PyNumber_Invert>();
+}

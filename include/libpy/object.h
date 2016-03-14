@@ -99,12 +99,12 @@ namespace py {
 
            @param cpfrom The object to copy.
         */
-        tmpref(const tmpref<T> &cpfrom) : T(cpfrom.ob) {
+        tmpref(const tmpref &cpfrom) : T(cpfrom.ob) {
             this->incref();
         }
 
-        tmpref(tmpref<T> &&mvfrom) noexcept : T(mvfrom) {
-            this->ob = std::move(mvfrom.ob);
+        tmpref(tmpref &&mvfrom) noexcept : T(mvfrom) {
+            mvfrom.ob = nullptr;
         }
 
         tmpref(T &&mvfrom) : T((PyObject*) mvfrom) {
@@ -113,22 +113,25 @@ namespace py {
 
         using T::operator=;
 
-        tmpref &operator=(const tmpref<T> &cpfrom) {
+        tmpref &operator=(const tmpref &cpfrom) {
             this->ob = cpfrom.ob;
             this->incref();
             return *this;
         }
 
-        tmpref &operator=(tmpref<T> &&mvfrom) {
+        tmpref &operator=(tmpref &&mvfrom) {
             this->ob = mvfrom.ob;
             mvfrom.ob = nullptr;
             return *this;
         }
 
-        tmpref<T> as_tmpref() &&{
-            tmpref<T> ret(this->ob);
-            this->ob = nullptr;
-            return ret;
+        /**
+           Move the internal pointer to a new `tmpref`.
+
+           @return A new `tmpref`.
+        */
+        tmpref as_tmpref() &&{
+            return std::move(*this);
         }
 
         /**
@@ -170,7 +173,7 @@ namespace py {
         }
 
         template<PyObject *func(PyObject*)>
-        inline tmpref<object> ob_unary_func() const {
+        inline PyObject *ob_unary_func() const {
             if (!is_nonnull()) {
                 pyutils::failed_null_check();
                 return nullptr;
@@ -188,7 +191,7 @@ namespace py {
         }
 
         template<PyObject *func(PyObject*, PyObject*), typename T>
-        inline tmpref<object> ob_binary_func(const T &other) const {
+        inline PyObject *ob_binary_func(const T &other) const {
             if (!pyutils::all_nonnull(*this, other)) {
                 pyutils::failed_null_check();
                 return nullptr;
