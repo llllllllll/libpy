@@ -157,12 +157,12 @@ tmpref<object> object::next() const {
     return PyIter_Next(ob);
 }
 
-object::const_iterator object::begin() const {
-    return std::move(object(ob_unary_func<PyObject_GetIter>()));
+object::iterator object::begin() const {
+    return cbegin();
 }
 
-object::const_iterator object::end() const {
-    return object::const_iterator();
+object::iterator object::end() const {
+    return cend();
 }
 
 object::const_iterator object::cbegin() const {
