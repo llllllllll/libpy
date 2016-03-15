@@ -188,5 +188,45 @@ namespace py {
                 return ob_binary_func<PyNumber_Or>(other);
             }
         };
+
+        /**
+           Check if an object is an instance of `int`.
+
+           @param t The object to check
+           @return  1 if `ob` is an instance of `int`, 0 if `ob` is not an
+                    instance of `int`, -1 if an exception occured.
+        */
+        template<typename T>
+        inline int check(const T &t) {
+            if (!t.is_nonnull()) {
+                pyutils::failed_null_check();
+                return -1;
+            }
+            return PyLong_Check((PyObject*) t);
+        }
+
+        inline int check(const nonnull<object>&) {
+            return 1;
+        }
+
+        /**
+           Check if an object is an instance of `long` but not a subclass.
+
+           @param t The object to check
+           @return  1 if `ob` is an instance of `long`, 0 if `ob` is not an
+                    instance of `long`, -1 if an exception occured.
+        */
+        template<typename T>
+        inline int checkexact(const T &t) {
+            if (!t.is_nonnull()) {
+                pyutils::failed_null_check();
+                return -1;
+            }
+            return PyLong_CheckExact((PyObject*) t);
+        }
+
+        inline int checkexact(const nonnull<object>&) {
+            return 1;
+        }
     }
 }

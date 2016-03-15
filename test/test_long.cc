@@ -103,7 +103,7 @@ AS_NUMERIC_TEST(as_double)
             auto ob = long_::object(limits.max()).as_tmpref() + 1_p;    \
             int overflow;                                               \
                                                                         \
-            EXPECT_EQ(ob.method(overflow), -1);                        \
+            EXPECT_EQ(ob.method(overflow), -1);                         \
             EXPECT_NO_PYTHON_ERR();                                     \
             EXPECT_EQ(overflow, 1);                                     \
         }                                                               \
@@ -111,3 +111,19 @@ AS_NUMERIC_TEST(as_double)
 
 AS_NUMERIC_AND_OVERFLOW_TEST(as_long_and_overflow)
 AS_NUMERIC_AND_OVERFLOW_TEST(as_long_long_and_overflow)
+
+TEST(Long, check) {
+    auto n = 1_p;
+    auto m = long_::object(1).as_tmpref();
+
+    EXPECT_TRUE(long_::check(n));
+    EXPECT_TRUE(long_::checkexact(n));
+    EXPECT_TRUE(long_::check(n.as_nonnull()));
+    EXPECT_TRUE(long_::checkexact(n.as_nonnull()));
+
+    // tmpref
+    EXPECT_TRUE(long_::check(m));
+    EXPECT_TRUE(long_::checkexact(m));
+    EXPECT_TRUE(long_::check(m.as_nonnull()));
+    EXPECT_TRUE(long_::checkexact(m.as_nonnull()));
+}

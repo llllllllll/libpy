@@ -54,18 +54,28 @@ namespace py{
             */
             ssize_t len() const;
 
+            using py::object::operator[];
+
             /**
                Get the object at `idx` without bounds checking.
 
                @param idx The integer index into the tuple.
                @return    The object at index `idx`.
             */
+            // this is not a template because it is ambigious with the template
+            // defined in the base class
             py::object operator[](ssize_t idx) const;
+            py::object operator[](std::size_t idx) const;
+
 
             /**
                Alias for operator[].
             */
-            py::object getitem(ssize_t idx) const;
+            template<typename I,
+                     typename = std::enable_if_t<std::is_integral<I>::value>>
+            py::object getitem(I idx) const {
+                return *this[idx];
+            }
 
             /**
                Get the object at `idx` with bounds checking.
@@ -76,7 +86,14 @@ namespace py{
                @param idx The integer index into the tuple.
                @return    The object at index `idx` if it is in range.
             */
-            py::object getitem_checked(ssize_t idx) const;
+            template<typename I,
+                     typename = std::enable_if_t<std::is_integral<I>::value>>
+            py::object getitem_checked(I idx) const {
+                if (!is_nonnull()) {
+                    return nullptr;
+                }
+                return PyTuple_GetItem(ob, idx);
+            }
 
             /**
                Sets an object into a tuple. This should only be used to fill
@@ -89,7 +106,16 @@ namespace py{
                @param value The element to write.
                @return      zero on success, non-zero on failure.
             */
-            int setitem(ssize_t idx, const py::object &value) const;
+            template<typename I,
+                     typename = std::enable_if_t<std::is_integral<I>::value>>
+            int setitem(ssize_t idx, const py::object &value) const {
+                if (!is_nonnull()) {
+                    pyutils::failed_null_check();
+                    return -1;
+                }
+                PyTuple_SET_ITEM(ob, idx, (PyObject*) value);
+                return 0;
+            }
 
             /**
                Sets an object into a tuple. This should only be used to fill
@@ -102,7 +128,15 @@ namespace py{
                @param value The element to write.
                @return      zero on success, non-zero on failure.
             */
-            int setitem_checked(ssize_t idx, const py::object &value) const;
+            template<typename I,
+                     typename = std::enable_if_t<std::is_integral<I>::value>>
+            int setitem_checked(I idx, const py::object &value) const {
+                if (!is_nonnull()) {
+                    pyutils::failed_null_check();
+                    return -1;
+                }
+                return PyTuple_SetItem(ob, idx, (PyObject*) value);
+            }
 
             /**
                Coerce to a `nonnull` object.
@@ -112,6 +146,14 @@ namespace py{
                @return this converted to a `nonnull` object.
             */
             nonnull<object> as_nonnull() const;
+
+            /**
+               Create a temporary reference. This is a reference that will
+               decref the object when it is destroyed.
+
+               @return this converted into a tmpref.
+            */
+            tmpref<object> as_tmpref() &&;
         };
 
         /* pull in the tuple templates after defining `object` in this namespace
@@ -133,7 +175,7 @@ namespace py{
                 pyutils::failed_null_check();
                 return -1;
             }
-            return PyTuple_Check(t.ob);
+            return PyTuple_Check((PyObject*) t);
         }
 
         inline int check(const nonnull<object>&) {
@@ -153,7 +195,7 @@ namespace py{
                 pyutils::failed_null_check();
                 return -1;
             }
-            return PyTuple_CheckExact(t.ob);
+            return PyTuple_CheckExact((PyObject*) t);
         }
 
         inline int checkexact(const nonnull<object>&) {

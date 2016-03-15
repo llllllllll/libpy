@@ -157,6 +157,22 @@ tmpref<object> object::next() const {
     return PyIter_Next(ob);
 }
 
+object::const_iterator object::begin() const {
+    return std::move(object(ob_unary_func<PyObject_GetIter>()));
+}
+
+object::const_iterator object::end() const {
+    return object::const_iterator();
+}
+
+object::const_iterator object::cbegin() const {
+    return std::move(object(ob_unary_func<PyObject_GetIter>()));
+}
+
+object::const_iterator object::cend() const {
+    return object::const_iterator();
+}
+
 tmpref<object> object::richcompare(const object &other, compareop opid) const {
     // PyObject_RichCompare does its own null checks
     return PyObject_RichCompare(ob, other.ob, opid);

@@ -147,6 +147,61 @@ namespace py {
     };
 
     /**
+       An object that represents ownership. When a raw object is given to
+       this it is increfed to represent the new ownership.
+    */
+    template<typename T>
+    class ownedref : public tmpref<T> {
+    public:
+        friend T;
+
+        ownedref() : tmpref<T>(nullptr) {}
+        ownedref(PyObject *pob) : tmpref<T>(pob) {
+            this->incref();
+        }
+
+        /**
+           Copy constructor for ownedref which increfs the input to make the
+           refcounts check out when both objects are destroyed.
+
+           @param cpfrom The object to copy.
+        */
+        ownedref(const ownedref &cpfrom) : tmpref<T>(cpfrom.ob) {
+            this->incref();
+        }
+
+        ownedref(ownedref &&mvfrom) noexcept : tmpref<T>(mvfrom.ob) {
+            mvfrom.ob = nullptr;
+        }
+
+        ownedref(T &&mvfrom) : T((PyObject*) mvfrom) {
+            mvfrom.ob = nullptr;
+        }
+
+        using tmpref<T>::operator=;
+
+        ownedref &operator=(const ownedref &cpfrom) {
+            this->ob = cpfrom.ob;
+            this->incref();
+            return *this;
+        }
+
+        ownedref &operator=(ownedref &&mvfrom) {
+            this->ob = mvfrom.ob;
+            mvfrom.ob = nullptr;
+            return *this;
+        }
+
+        void invalidate() && {
+            this->decref();
+            tmpref<T>::invalidate();
+        }
+    };
+
+    template<typename T>
+    class iterator;
+
+    /**
        A wrapper around `PyObject*` to provide a C++ interface to the
        CPython API.
     */
@@ -468,6 +523,35 @@ namespace py {
         */
         tmpref<object> next() const;
 
+        /**
+           Constant iterator over a py::object.
+        */
+        using const_iterator = iterator<const object>;
+        friend const_iterator;
+
+        const_iterator begin() const;
+        const_iterator end() const;
+
+        /**
+           Get a constant iterator to the begining of an object.
+
+           This is an input iterator, it may only be consumed once and can
+           only be traversed going forward.
+
+           @return The iterator.
+        */
+        const_iterator cbegin() const;
+
+        /**
+           Get the end marker for traversal.
+
+           `const_iterator` is an input iterator so it may only be traversed
+           a single time going forward.
+
+           @return The end marker.
+        */
+        const_iterator cend() const;
+
         // relational operators
         /**
            Compare the object to another object where the `opid` is
@@ -744,6 +828,79 @@ namespace py {
         pyargs.decref();
         return ret.ob;
     }
+
+    template<typename T>
+    class iterator : public std::iterator<std::input_iterator_tag, T, void> {
+    private:
+        ownedref<object> it;
+        tmpref<object> last;
+
+    protected:
+        iterator(T &&t)
+            : it((PyObject*) t), last(std::move(it.next())) {
+            if (!last.is_nonnull()) {
+                it.ob = nullptr;
+            }
+        }
+
+    public:
+        friend T;
+
+        /**
+           Default constructor for cend.
+        */
+        iterator() : it(nullptr), last(nullptr) {}
+        iterator(const iterator &t) : it(t.it), last(t.last.incref()) {}
+        iterator(iterator &&t) : it(std::move(t.it)), last(std::move(t.last)) {}
+
+        iterator &operator=(const iterator &t) {
+            it = t.it;
+            last = t.last;
+            return *this;
+        }
+
+        iterator &operator=(iterator &&t) {
+            it = std::move(t.it);
+            last = std::move(t.last);
+            return *this;
+        }
+
+        bool operator==(const iterator &other) const {
+            return (PyObject*) it == nullptr && (PyObject*) other.it == nullptr;
+        }
+
+        bool operator!=(const iterator &other) const {
+            return !(*this == other);
+        }
+
+        const object &operator*() const {
+            return last;
+        }
+
+        const object *operator->() const {
+            return &last;
+        }
+
+        iterator &operator++() {
+            if (it.is_nonnull()) {
+                last.decref();
+                last = std::move(it.next());
+                if (!last.is_nonnull()) {
+                    it.decref();
+                    it = std::move(ownedref<object>(nullptr));
+                }
+            }
+            return *this;
+        }
+
+        iterator operator++(int) {
+            return ++*this;
+        }
+
+        operator iterator<T const>() {
+            return *this;
+        }
+    };
 
     /**
        Operator overload for unicode objects.
