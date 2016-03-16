@@ -35,6 +35,9 @@ TEST(Tuple, iteration) {
 
     ASSERT_EQ(ob.len(), 3);
     for (const auto &e : ob) {
+        ASSERT_TRUE((std::is_same<decltype(e), const object&>::value)) <<
+            "const iteration over ob does not yield correct type";
+
         EXPECT_EQ((PyObject*) e, (PyObject*) expected[n++]);
     }
     EXPECT_EQ(n, 3) << "ran through too many iterations";

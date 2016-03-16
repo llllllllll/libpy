@@ -33,6 +33,33 @@ void t::object::tuple_check() {
     }
 }
 
+t::object::const_iterator t::object::cbegin() const {
+    if (!is_nonnull()) {
+        return nullptr;
+    }
+    // it is safe to cast a PyObject* to a py::object because it has standard
+    // layout and only a single field
+    return (const py::object*) &((PyTupleObject*) ob)->ob_item[0];
+}
+
+t::object::const_iterator t::object::cend() const {
+    if (!is_nonnull()) {
+        return nullptr;
+    }
+
+    // it is safe to cast a PyObject* to a py::object because it has standard
+    // layout and only a single field
+    return (const py::object*) &((PyTupleObject*) ob)->ob_item[Py_SIZE(ob)];
+}
+
+t::object::iterator t::object::begin() const {;
+    return cbegin();
+}
+
+t::object::iterator t::object::end() const {
+    return cend();
+}
+
 ssize_t t::object::len() const {
     if (!is_nonnull()) {
         pyutils::failed_null_check();

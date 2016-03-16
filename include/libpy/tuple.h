@@ -46,6 +46,20 @@ namespace py{
             using py::object::operator=;
 
             /**
+               `PyTupleObject`s are actually backed by a C array of `PyObject*`s
+               so we can just use a `py::object*` which points into that
+               storage.
+            */
+            typedef const py::object* const_iterator;
+            typedef const_iterator iterator;
+
+            const_iterator cbegin() const;
+            const_iterator cend() const;
+            iterator begin() const;
+            iterator end() const;
+
+
+            /**
                Get the length of the object.
 
                This is equivalent to `len(this)`.
@@ -245,5 +259,4 @@ namespace py{
             return PyTuple_GET_SIZE(ob);
         }
     };
-
 }

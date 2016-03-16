@@ -11,6 +11,7 @@ using namespace py;
 
 TEST(Layout, py_object) {
     EXPECT_TRUE(std::is_standard_layout<object>::value);
+    EXPECT_EQ(sizeof(object), sizeof(PyObject*));
 }
 
 class Object : public testing::Test {
