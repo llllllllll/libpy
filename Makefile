@@ -2,7 +2,7 @@ CC=g++
 MAJOR_VERSION=1
 MINOR_VERSION=0
 MICRO_VERSION=0
-CFLAGS=-std=gnu++14 -Wall -Wextra -O3 -g
+CFLAGS=-std=gnu++14 -Wall -Wextra -O3 -g -fno-strict-aliasing
 LDFLAGS=
 SOURCES=$(wildcard src/*.cc)
 PYTHON_INCLUDE=$(shell etc/which_py_include)
