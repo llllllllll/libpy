@@ -846,15 +846,12 @@ namespace py {
             return nullptr;
         }
 
-        object pyargs = _tuple_templates::pack(args...);
+        auto pyargs = _tuple_templates::pack(args...);
 
-        if (!pyargs.ob) {
+        if (!pyargs.is_nonnull()) {
             return nullptr;
         }
-
-        object ret = PyObject_Call(ob, pyargs.ob, nullptr);
-        pyargs.decref();
-        return ret.ob;
+        return PyObject_Call(ob, pyargs.ob, nullptr);
     }
 
     namespace iter {

@@ -2,16 +2,10 @@
 #include <tuple>
 
 #include "libpy/object.h"
+#include "libpy/type.h"
 
 namespace py{
     namespace tuple {
-        /**
-           The type of Python `tuple` objects.
-
-           This is equivalent to: `tuple`.
-        */
-        extern const object type;
-
         /**
            A subclass of `py::object` for optional tuples.
         */
@@ -169,6 +163,13 @@ namespace py{
             */
             tmpref<object> as_tmpref() &&;
         };
+
+        /**
+           The type of Python `tuple` objects.
+
+           This is equivalent to: `tuple`.
+        */
+        extern const type::object<tuple::object> type;
 
         /* pull in the tuple templates after defining `object` in this namespace
            so that `py::tuple::pack` and `py::tuple::from_tuple`` will return

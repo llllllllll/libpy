@@ -4,7 +4,7 @@
 using namespace py;
 namespace t = tuple;
 
-const object t::type = py::object((PyObject*) &PyTuple_Type);
+const type::object<t::object> t::type((PyObject*) &PyTuple_Type);
 
 t::object::object() : py::object() {}
 

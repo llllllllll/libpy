@@ -22,6 +22,6 @@ object from_tuple(const T &t) {
    @return      The elements packed as a Python `tuple`.
 */
 template<typename... Ts>
-object pack(const Ts&... elems) {
+tmpref<object> pack(const Ts&... elems) {
     return PyTuple_Pack(sizeof...(Ts), ((PyObject*) elems)...);
 }
