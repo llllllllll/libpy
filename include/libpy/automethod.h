@@ -142,7 +142,7 @@ namespace pyutils {
         pyutils::_function_traits<decltype(f)>::flags,                  \
         doc,                                                            \
     })
-#define _libpy_automethod_1(f) _libpy_automethod_2(f, NULL)
+#define _libpy_automethod_1(f) _libpy_automethod_2(f, nullptr)
 #define _libpy_automethod_dispatch(n, f, doc, macro, ...)  macro
 
 #define _libpy_named_automethod_3(name, f, doc) (PyMethodDef {          \
@@ -151,15 +151,15 @@ namespace pyutils {
         METH_VARARGS,                                                   \
         doc,                                                            \
     })
-#define _libpy_named_automethod_2(name, f) _libpy_automethod_2(name, f, NULL)
+#define _libpy_named_automethod_2(name, f) _libpy_automethod_2(name, f, nullptr)
 #define _libpy_named_automethod_dispatch(n, f, doc, macro, ...)  macro
 
     /**
-       Wrap a C++ function as a python PyMethodDef structure.
+       Wrap a C++ function as a python `PyMethodDef` structure.
 
        @param func The function to wrap.
        @param doc  The docstring to use for the function. If this is omitted
-                   the docstring will be None.
+                   the docstring will `be None`.
        @return     A `PyMethodDef` structure for the given function.
     */
 #define automethod(...)                                                 \
@@ -168,12 +168,16 @@ namespace pyutils {
                                _libpy_automethod_1(__VA_ARGS__))
 
     /**
-       Wrap a C++ function as a python PyMethodDef structure.
+       Wrap a C++ function as a python PyMethodDef structure but give the
+       python function an explicit name.
 
-       @param name The name of the wrapped function.
+       This is useful when the function being wrapped is defined in some
+       namespace so that the python name does not have the `::` in it.
+
+       @param name The name for the function as it will be seen from python.
        @param func The function to wrap.
        @param doc  The docstring to use for the function. If this is omitted
-                   the docstring will be None.
+                   the docstring will be `None`.
        @return     A `PyMethodDef` structure for the given function.
     */
 #define named_automethod(...)                                           \
