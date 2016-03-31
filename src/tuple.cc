@@ -68,6 +68,14 @@ ssize_t t::object::len() const {
     return PyTuple_GET_SIZE(ob);
 }
 
+py::object t::object::operator[](int idx) const {
+    if (!is_nonnull()) {
+        pyutils::failed_null_check();
+        return nullptr;
+    }
+    return PyTuple_GET_ITEM(ob, idx);
+}
+
 py::object t::object::operator[](ssize_t idx) const {
     if (!is_nonnull()) {
         pyutils::failed_null_check();

@@ -72,6 +72,7 @@ namespace py{
             */
             // this is not a template because it is ambigious with the template
             // defined in the base class
+            py::object operator[](int idx) const;
             py::object operator[](ssize_t idx) const;
             py::object operator[](std::size_t idx) const;
 
@@ -227,16 +228,17 @@ namespace py{
     */
     template<>
     class nonnull<tuple::object> : public tuple::object {
-    private:
+    protected:
         nonnull() = delete;
         explicit nonnull(PyObject *ob) : tuple::object(ob) {}
+
+    public:
+        friend class object;
+
         nonnull(const nonnull &cpfrom) : tuple::object(cpfrom) {}
         nonnull(nonnull &&mvfrom) noexcept : tuple::object((PyObject*) mvfrom) {
             mvfrom.ob = nullptr;
         }
-
-    public:
-        friend class object;
 
         nonnull &operator=(const nonnull &cpfrom) {
             nonnull<tuple::object> tmp(cpfrom);

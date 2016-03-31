@@ -202,6 +202,10 @@ tmpref<object> object::operator>=(const object &other) const {
     return t_richcompare<GE>(other);
 }
 
+bool object::is(const object &other) const {
+    return ob == other.ob;
+}
+
 tmpref<object> object::operator-() const {
     return ob_unary_func<PyNumber_Negative>();
 }

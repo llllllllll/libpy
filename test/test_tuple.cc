@@ -41,7 +41,7 @@ TEST(Tuple, ssize_t_indexing) {
 
     ASSERT_EQ(ob.len(), 3);
     for (ssize_t n : {0, 1, 2}) {
-        EXPECT_EQ((PyObject*) ob[n], (PyObject*) expected[n]);
+        EXPECT_TRUE(ob[n].is(expected[n]));
     }
 }
 
@@ -55,7 +55,7 @@ TEST(Tuple, iteration) {
         ASSERT_TRUE((std::is_same<decltype(e), const object&>::value)) <<
             "const iteration over ob does not yield correct type";
 
-        EXPECT_EQ((PyObject*) e, (PyObject*) expected[n++]);
+        EXPECT_TRUE(e.is(expected[n++]));
     }
     EXPECT_EQ(n, 3) << "ran through too many iterations";
 }

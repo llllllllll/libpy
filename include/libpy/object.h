@@ -603,6 +603,16 @@ namespace py {
         tmpref<object>operator>(const object&) const;
         tmpref<object>operator>=(const object&) const;
 
+        /**
+           Check if two objects wrap the same underlying PyObject*.
+
+           This is equivalent to: `this is other`.
+
+           @param other The object to compare this to.
+           @return Do these object wrap the same PyObject.
+        */
+        bool is(const object &other) const;
+
         // numeric operators
         template<typename T>
         tmpref<object> operator+(const T &other) const {
