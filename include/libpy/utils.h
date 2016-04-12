@@ -21,7 +21,7 @@ namespace pyutils {
     struct Apply<0> {
         template<typename F, typename T, typename... A>
         static inline auto apply(F &&f, T&&, A&&... a) {
-            return ::std::forward<F>(f)(::std::forward<A>(a)...);
+            return std::forward<F>(f)(std::forward<A>(a)...);
         }
     };
 

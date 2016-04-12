@@ -49,6 +49,16 @@ namespace py {
     extern const object Ellipsis;
 
     /**
+       `py::object` representating `True`.
+    */
+    extern const object True;
+
+    /**
+       `py::object` representating `False`.
+    */
+    extern const object False;
+
+    /**
        An object where `ob` is known to be nonnull.
        This is used to skip null checks for performance.
 
@@ -802,6 +812,14 @@ namespace py {
            @return *this.
         */
         const object &decref();
+
+        /**
+           Decrement the referece count of the object and set the internal
+           object pointer to `nullptr`.
+
+           @return *this.
+        */
+        const object &clear();
 
         /**
            Get the ref count of the object.

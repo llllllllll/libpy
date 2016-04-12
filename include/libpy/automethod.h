@@ -15,49 +15,49 @@ namespace pyutils {
        auto method on a type that has no format character.
     */
     template<typename T>
-    constexpr char _typeformat;
+    constexpr char typeformat;
 
     template<>
-    constexpr char _typeformat<const char*> = 'z';
+    constexpr char typeformat<const char*> = 'z';
 
     template<>
-    constexpr char _typeformat<Py_buffer> = 's';
+    constexpr char typeformat<Py_buffer> = 's';
 
     template<>
-    constexpr char _typeformat<char> = 'c';
+    constexpr char typeformat<char> = 'c';
 
     template<>
-    constexpr char _typeformat<unsigned char> = 'b';
+    constexpr char typeformat<unsigned char> = 'b';
 
     template<>
-    constexpr char _typeformat<unsigned short> = 'h';
+    constexpr char typeformat<unsigned short> = 'h';
 
     template<>
-    constexpr char _typeformat<int> = 'i';
+    constexpr char typeformat<int> = 'i';
 
     template<>
-    constexpr char _typeformat<long> = 'l';
+    constexpr char typeformat<long> = 'l';
 
     template<>
-    constexpr char _typeformat<unsigned long> = 'k';
+    constexpr char typeformat<unsigned long> = 'k';
 
     template<>
-    constexpr char _typeformat<float> = 'f';
+    constexpr char typeformat<float> = 'f';
 
     template<>
-    constexpr char _typeformat<double> = 'd';
+    constexpr char typeformat<double> = 'd';
 
     template<>
-    constexpr char _typeformat<Py_complex> = 'D';
+    constexpr char typeformat<Py_complex> = 'D';
 
     template<>
-    constexpr char _typeformat<PyObject*> = 'O';
+    constexpr char typeformat<PyObject*> = 'O';
 
     template<>
-    constexpr char _typeformat<py::object> = 'O';
+    constexpr char typeformat<py::object> = 'O';
 
     template<>
-    constexpr char _typeformat<bool> = 'p';
+    constexpr char typeformat<bool> = 'p';
 
     /**
        Struct for extracting traits about the function being wrapped.
@@ -76,7 +76,7 @@ namespace pyutils {
         static constexpr auto flags = arity ? METH_VARARGS : METH_NOARGS;
 
         static inline auto fmtstr() {
-            return std::array<char, arity + 1> {_typeformat<Args>..., '\0'};
+            return std::array<char, arity + 1> {typeformat<Args>..., '\0'};
         }
     };
 

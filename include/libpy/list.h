@@ -5,17 +5,17 @@
 #include "libpy/type.h"
 
 namespace py{
-    namespace tuple {
+    namespace list {
         /**
-           A subclass of `py::object` for optional tuples.
+           A subclass of `py::object` for optional lists.
         */
         class object : public py::object {
         private:
             /**
-               Function called to verify that `ob` is a tuple and
+               Function called to verify that `ob` is a list and
                correctly raise a python exception otherwies.
             */
-            void tuple_check();
+            void list_check();
         public:
             friend class py::tmpref<object>;
 
@@ -25,13 +25,21 @@ namespace py{
             object();
 
             /**
-               Constructor from `PyObject*`. If `pob` is not a `tuple` then
+               Constructor from `size_t` and `ssize_t`, these allocate new
+               lists of the given length.
+            */
+            object(int len);
+            object(std::size_t len);
+            object(ssize_t len);
+
+            /**
+               Constructor from `PyObject*`. If `pob` is not a `list` then
                `ob` will be set to `nullptr`.
             */
             object(PyObject *pob);
 
             /**
-               Constructor from `py::object`. If `pob` is not a `tuple` then
+               Constructor from `py::object`. If `pob` is not a `list` then
                `ob` will be set to `nullptr`.
             */
             object(const py::object &pob);
@@ -42,7 +50,7 @@ namespace py{
             using py::object::operator=;
 
             /**
-               `PyTupleObject`s are actually backed by a C array of `PyObject*`s
+               `PyListObject`s are actually backed by a C array of `PyObject*`s
                so we can just use a `py::object*` which points into that
                storage.
             */
@@ -69,7 +77,7 @@ namespace py{
             /**
                Get the object at `idx` without bounds checking.
 
-               @param idx The integer index into the tuple.
+               @param idx The integer index into the list.
                @return    The object at index `idx`.
             */
             // this is not a template because it is ambigious with the template
@@ -94,7 +102,7 @@ namespace py{
                When the index is out of bounds this will return
                `py::object(nullptr)` and set a Python `IndexError`.
 
-               @param idx The integer index into the tuple.
+               @param idx The integer index into the list.
                @return    The object at index `idx` if it is in range.
             */
             template<typename I,
@@ -103,17 +111,17 @@ namespace py{
                 if (!is_nonnull()) {
                     return nullptr;
                 }
-                return PyTuple_GetItem(ob, idx);
+                return PyList_GetItem(ob, idx);
             }
 
             /**
-               Sets an object into a tuple. This should only be used to fill
-               new tuples.
+               Sets an object into a list. This should only be used to fill
+               new lists.
 
                This method steals a reference to value.
                This does not do bounds checking.
 
-               @param idx   The integer index into the tuple.
+               @param idx   The integer index into the list.
                @param value The element to write.
                @return      zero on success, non-zero on failure.
             */
@@ -124,18 +132,18 @@ namespace py{
                     pyutils::failed_null_check();
                     return -1;
                 }
-                PyTuple_SET_ITEM(ob, idx, (PyObject*) value);
+                PyList_SET_ITEM(ob, idx, (PyObject*) value);
                 return 0;
             }
 
             /**
-               Sets an object into a tuple. This should only be used to fill
-               new tuples.
+               Sets an object into a list. This should only be used to fill
+               new lists.
 
                This method steals a reference to value.
                This method does bounds checking.
 
-               @param idx   The integer index into the tuple.
+               @param idx   The integer index into the list.
                @param value The element to write.
                @return      zero on success, non-zero on failure.
             */
@@ -146,7 +154,22 @@ namespace py{
                     pyutils::failed_null_check();
                     return -1;
                 }
-                return PyTuple_SetItem(ob, idx, (PyObject*) value);
+                return PyList_SetItem(ob, idx, (PyObject*) value);
+            }
+
+            /**
+               Append an element to a list.
+
+               @param elem The element to append.
+               @return -1 on failure, otherwise zero.
+            */
+            template<typename T>
+            int append(const T &elem) {
+                if (!pyutils::all_nonnull(*this, elem)) {
+                    pyutils::failed_null_check();
+                    return -1;
+                }
+                return PyList_Append((PyObject*) *this, elem);
             }
 
             /**
@@ -167,25 +190,39 @@ namespace py{
             tmpref<object> as_tmpref() &&;
         };
 
-        /**
-           The type of Python `tuple` objects.
-
-           This is equivalent to: `tuple`.
-        */
-        extern const type::object<tuple::object> type;
-
-        /* pull in the tuple templates after defining `object` in this namespace
-           so that `py::tuple::pack` and `py::tuple::from_tuple`` will return
-           `py::tuple::object` instead of `py::object`.
-        */
-        #include "libpy/_tuple_templates.h"
 
         /**
-           Check if an object is an instance of `tuple`.
+           Pack variadic arguments into a Python `list` object.
+
+           @param elems The elements to pack.
+           @return      The elements packed as a Python `list`.
+        */
+        template<typename... Ts>
+        tmpref<object> pack(const Ts&... elems) {
+            list::object l(0);
+            int status[] = { l.append(elems)... };
+            for (int st : status) {
+                if (st) {
+                    l.decref();
+                    return nullptr;
+                }
+            }
+            return l;
+        }
+
+        /**
+           The type of Python `list` objects.
+
+           This is equivalent to: `list`.
+        */
+        extern const type::object<list::object> type;
+
+        /**
+           Check if an object is an instance of `list`.
 
            @param t The object to check
-           @return  1 if `ob` is an instance of `tuple`, 0 if `ob` is not an
-                    instance of `tuple`, -1 if an exception occured.
+           @return  1 if `ob` is an instance of `list`, 0 if `ob` is not an
+                    instance of `list`, -1 if an exception occured.
         */
         template<typename T>
         inline int check(const T &t) {
@@ -193,7 +230,7 @@ namespace py{
                 pyutils::failed_null_check();
                 return -1;
             }
-            return PyTuple_Check((PyObject*) t);
+            return PyList_Check((PyObject*) t);
         }
 
         inline int check(const nonnull<object>&) {
@@ -201,11 +238,11 @@ namespace py{
         }
 
         /**
-           Check if an object is an instance of `tuple` but not a subclass.
+           Check if an object is an instance of `list` but not a subclass.
 
            @param t The object to check
-           @return  1 if `ob` is an instance of `tuple`, 0 if `ob` is not an
-                    instance of `tuple`, -1 if an exception occured.
+           @return  1 if `ob` is an instance of `list`, 0 if `ob` is not an
+                    instance of `list`, -1 if an exception occured.
         */
         template<typename T>
         inline int checkexact(const T &t) {
@@ -213,7 +250,7 @@ namespace py{
                 pyutils::failed_null_check();
                 return -1;
             }
-            return PyTuple_CheckExact((PyObject*) t);
+            return PyList_CheckExact((PyObject*) t);
         }
 
         inline int checkexact(const nonnull<object>&) {
@@ -222,28 +259,28 @@ namespace py{
     }
 
     /**
-       A `py::tuple::object` where `ob` is known to be nonnull.
+       A `py::list::object` where `ob` is known to be nonnull.
        This is used to skip null checks for performance.
 
        This class should be used where users want to trade the ability to
        write a nested expression for perfomance.
     */
     template<>
-    class nonnull<tuple::object> : public tuple::object {
+    class nonnull<list::object> : public list::object {
     protected:
         nonnull() = delete;
-        explicit nonnull(PyObject *ob) : tuple::object(ob) {}
+        explicit nonnull(PyObject *ob) : list::object(ob) {}
 
     public:
         friend class object;
 
-        nonnull(const nonnull &cpfrom) : tuple::object(cpfrom) {}
-        nonnull(nonnull &&mvfrom) noexcept : tuple::object((PyObject*) mvfrom) {
+        nonnull(const nonnull &cpfrom) : list::object(cpfrom) {}
+        nonnull(nonnull &&mvfrom) noexcept : list::object((PyObject*) mvfrom) {
             mvfrom.ob = nullptr;
         }
 
         nonnull &operator=(const nonnull &cpfrom) {
-            nonnull<tuple::object> tmp(cpfrom);
+            nonnull<list::object> tmp(cpfrom);
             return (*this = std::move(tmp));
         }
 
@@ -261,7 +298,7 @@ namespace py{
            @return The length of the object or -1 if an exception occured.
         */
         ssize_t len() const {
-            return PyTuple_GET_SIZE(ob);
+            return PyList_GET_SIZE(ob);
         }
     };
 }

@@ -8,6 +8,8 @@ using namespace py;
 const object py::None = Py_None;
 const object py::NotImplemented = Py_NotImplemented;
 const object py::Ellipsis = Py_Ellipsis;
+const object py::True = Py_True;
+const object py::False = Py_False;
 
 object::object() : ob(nullptr) {}
 
@@ -240,6 +242,12 @@ const object &object::decref() {
             ob = nullptr;
         }
     }
+    return *this;
+}
+
+const object &object::clear() {
+    decref();
+    ob = nullptr;
     return *this;
 }
 

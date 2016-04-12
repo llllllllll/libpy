@@ -30,7 +30,8 @@ namespace py {
 
             template<typename... Ts>
             tmpref<Instance> operator()(const Ts&... args) const {
-                return (PyObject*) py::object::operator()(args...);
+                py::object ret(py::object::operator()(args...));
+                return (PyObject*) ret;
             }
         };
     }
