@@ -2,8 +2,6 @@
 
 #include "libpy/object.h"
 
-using namespace py;
-
 TEST(NonNull, test_good_nonnull) {
     EXPECT_EQ((PyObject*) py::None.as_nonnull(), (PyObject*) py::None) <<
         "None.as_nonnull() should wrap the same object as None";
@@ -12,7 +10,7 @@ TEST(NonNull, test_good_nonnull) {
 }
 
 TEST(NonNull, test_bad_nonnull) {
-    object c(nullptr);
+    py::object c(nullptr);
 
     EXPECT_FALSE(c.is_nonnull());
 

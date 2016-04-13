@@ -3,115 +3,113 @@
 
 #include "libpy/object.h"
 
-using namespace py;
+const py::object py::None = Py_None;
+const py::object py::NotImplemented = Py_NotImplemented;
+const py::object py::Ellipsis = Py_Ellipsis;
+const py::object py::True = Py_True;
+const py::object py::False = Py_False;
 
-const object py::None = Py_None;
-const object py::NotImplemented = Py_NotImplemented;
-const object py::Ellipsis = Py_Ellipsis;
-const object py::True = Py_True;
-const object py::False = Py_False;
+py::object::object() : ob(nullptr) {}
 
-object::object() : ob(nullptr) {}
+py::object::object(PyObject *pob) : ob(pob) {}
 
-object::object(PyObject *pob) : ob(pob) {}
+py::object::object(const py::object &cpfrom) : ob(cpfrom.ob) {}
 
-object::object(const object &cpfrom) : ob(cpfrom.ob) {}
-
-object::object(object &&mvfrom) noexcept : ob(mvfrom.ob) {
+py::object::object(py::object &&mvfrom) noexcept : ob(mvfrom.ob) {
     mvfrom.ob = nullptr;
 }
 
-object::object(tmpref<object> &&mvfrom) noexcept : ob(mvfrom.ob) {
+py::object::object(py::tmpref<py::object> &&mvfrom) noexcept : ob(mvfrom.ob) {
     mvfrom.ob = nullptr;
 }
 
-const object &py::operator""_p(char c) {
-    static std::unordered_map<char, object> cache;
-    object &ob = cache[c];
+const py::object &py::operator""_p(char c) {
+    static std::unordered_map<char, py::object> cache;
+    py::object &ob = cache[c];
     if (!ob.is_nonnull()) {
         ob.ob = PyUnicode_FromStringAndSize(&c, 1);
     }
     return ob;
 }
 
-const object &py::operator""_p(const char *cs, std::size_t len) {
-    static std::unordered_map<const char*, object> cache;
-    object &ob = cache[cs];
+const py::object &py::operator""_p(const char *cs, std::size_t len) {
+    static std::unordered_map<const char*, py::object> cache;
+    py::object &ob = cache[cs];
     if (!ob.is_nonnull()) {
         ob.ob = PyUnicode_FromStringAndSize(cs, len);
     }
     return ob;
 }
 
-const object &py::operator""_p(wchar_t c) {
-    static std::unordered_map<wchar_t, object> cache;
-    object &ob = cache[c];
+const py::object &py::operator""_p(wchar_t c) {
+    static std::unordered_map<wchar_t, py::object> cache;
+    py::object &ob = cache[c];
     if (!ob.is_nonnull()) {
         ob.ob = PyUnicode_FromWideChar(&c, 1);
     }
     return ob;
 }
 
-const object &py::operator""_p(const wchar_t *cs, std::size_t len) {
-    static std::unordered_map<const wchar_t*, object> cache;
-    object &ob = cache[cs];
+const py::object &py::operator""_p(const wchar_t *cs, std::size_t len) {
+    static std::unordered_map<const wchar_t*, py::object> cache;
+    py::object &ob = cache[cs];
     if (!ob.is_nonnull()) {
         ob.ob = PyUnicode_FromWideChar(cs, len);
     }
     return ob;
 }
 
-const object &py::operator""_p(long double d) {
-    static std::unordered_map<long double, object> cache;
-    object &ob = cache[d];
+const py::object &py::operator""_p(long double d) {
+    static std::unordered_map<long double, py::object> cache;
+    py::object &ob = cache[d];
     if (!ob.is_nonnull()) {
         ob.ob = PyFloat_FromDouble(d);
     }
     return ob;
 }
 
-std::ostream &py::operator<<(std::ostream &stream, const object &ob) {
+std::ostream &py::operator<<(std::ostream &stream, const py::object &ob) {
     /* We can avoid the null check because this happens in PyUnicode_AsUTF8.
        When ob is nullptr the result is "<NULL>". */
     return stream << PyUnicode_AsUTF8(ob.str());
 }
 
-object &object::operator=(const object &cpfrom) {
-    object tmp(cpfrom);
+py::object &py::object::operator=(const py::object &cpfrom) {
+    py::object tmp(cpfrom);
     return (*this = std::move(tmp));
 }
 
-object &object::operator=(object &&mvfrom) noexcept {
+py::object &py::object::operator=(py::object &&mvfrom) noexcept {
     ob = mvfrom.ob;
     mvfrom.ob = nullptr;
     return *this;
 }
 
-int object::print(FILE *f, int flags) const {
+int py::object::print(FILE *f, int flags) const {
     return PyObject_Print(ob, f, flags);
 }
 
-tmpref<object> object::repr() const {
+py::tmpref<py::object> py::object::repr() const {
     return PyObject_Repr(ob);
 }
 
-tmpref<object> object::ascii() const {
+py::tmpref<py::object> py::object::ascii() const {
     return PyObject_ASCII(ob);
 }
 
-tmpref<object> object::str() const {
+py::tmpref<py::object> py::object::str() const {
     return PyObject_Str(ob);
 }
 
-tmpref<object> object::bytes() const {
+py::tmpref<py::object> py::object::bytes() const {
     return PyObject_Bytes(ob);
 }
 
-bool object::iscallable() const {
+bool py::object::iscallable() const {
     return PyCallable_Check(ob);
 }
 
-hash_t object::hash() const {
+py::hash_t py::object::hash() const {
     if (!is_nonnull()) {
         pyutils::failed_null_check();
         return -1;
@@ -119,11 +117,11 @@ hash_t object::hash() const {
     return PyObject_Hash(ob);
 }
 
-int object::istrue() const {
+int py::object::istrue() const {
     return int_unary_func<PyObject_IsTrue>();
 }
 
-object object::type() const {
+py::object py::object::type() const {
     if (!is_nonnull()) {
         pyutils::failed_null_check();
         return nullptr;
@@ -131,12 +129,12 @@ object object::type() const {
     return (PyObject*) Py_TYPE(ob);
 }
 
-ssize_t object::len() const {
+ssize_t py::object::len() const {
     // PyObject_Length does its own null checks
     return PyObject_Length(ob);
 }
 
-ssize_t object::lenhint(ssize_t fallback) const {
+ssize_t py::object::lenhint(ssize_t fallback) const {
     if (!is_nonnull()) {
         pyutils::failed_null_check();
         return -1;
@@ -144,94 +142,94 @@ ssize_t object::lenhint(ssize_t fallback) const {
     return PyObject_LengthHint(ob, fallback);
 }
 
-tmpref<object> object::dir() const {
+py::tmpref<py::object> py::object::dir() const {
     // PyObject_Dir(NULL) has a very different meaning than expected here
     // so we will raise in that case
     return ob_unary_func<PyObject_Dir>();
 }
 
-tmpref<object> object::iter() const {
+py::tmpref<py::object> py::object::iter() const {
     return ob_unary_func<PyObject_GetIter>();
 }
 
-tmpref<object> object::next() const {
+py::tmpref<py::object> py::object::next() const {
     // NULL is a valid input to PyIter_Next
     return PyIter_Next(ob);
 }
 
-object::iterator object::begin() const {
+py::object::iterator py::object::begin() const {
     return cbegin();
 }
 
-object::iterator object::end() const {
+py::object::iterator py::object::end() const {
     return cend();
 }
 
-object::const_iterator object::cbegin() const {
-    return std::move(object(ob_unary_func<PyObject_GetIter>()));
+py::object::const_iterator py::object::cbegin() const {
+    return std::move(py::object(ob_unary_func<PyObject_GetIter>()));
 }
 
-object::const_iterator object::cend() const {
-    return object::const_iterator();
+py::object::const_iterator py::object::cend() const {
+    return py::object::const_iterator();
 }
 
-tmpref<object> object::richcompare(const object &other, compareop opid) const {
+py::tmpref<py::object> py::object::richcompare(const py::object &other, compareop opid) const {
     // PyObject_RichCompare does its own null checks
     return PyObject_RichCompare(ob, other.ob, opid);
 }
 
-tmpref<object> object::operator<(const object &other) const {
+py::tmpref<py::object> py::object::operator<(const py::object &other) const {
     return t_richcompare<LT>(other);
 }
 
-tmpref<object> object::operator<=(const object &other) const {
+py::tmpref<py::object> py::object::operator<=(const py::object &other) const {
     return t_richcompare<LE>(other);
 }
 
-tmpref<object> object::operator==(const object &other) const {
+py::tmpref<py::object> py::object::operator==(const py::object &other) const {
     return t_richcompare<EQ>(other);
 }
 
-tmpref<object> object::operator!=(const object &other) const {
+py::tmpref<py::object> py::object::operator!=(const py::object &other) const {
     return t_richcompare<NE>(other);
 }
 
-tmpref<object> object::operator>(const object &other) const {
+py::tmpref<py::object> py::object::operator>(const py::object &other) const {
     return t_richcompare<GT>(other);
 }
 
-tmpref<object> object::operator>=(const object &other) const {
+py::tmpref<py::object> py::object::operator>=(const py::object &other) const {
     return t_richcompare<GE>(other);
 }
 
-bool object::is(const object &other) const {
+bool py::object::is(const py::object &other) const {
     return ob == other.ob;
 }
 
-tmpref<object> object::operator-() const {
+py::tmpref<py::object> py::object::operator-() const {
     return ob_unary_func<PyNumber_Negative>();
 }
 
-tmpref<object> object::operator+() const {
+py::tmpref<py::object> py::object::operator+() const {
     return ob_unary_func<PyNumber_Positive>();
 }
 
-tmpref<object> object::abs() const {
+py::tmpref<py::object> py::object::abs() const {
     return ob_unary_func<PyNumber_Absolute>();
 }
 
-tmpref<object> object::invert() const {
+py::tmpref<py::object> py::object::invert() const {
     return ob_unary_func<PyNumber_Invert>();
 }
 
-const object &object::incref() const {
+const py::object &py::object::incref() const {
     if (is_nonnull()) {
         Py_INCREF(ob);
     }
     return *this;
 }
 
-const object &object::decref() {
+const py::object &py::object::decref() {
     if (is_nonnull()) {
         // reimplement the Py_DECREF macro here so that we can set ob = nullptr
         // when we dealloc without checking the refcount twice
@@ -245,29 +243,29 @@ const object &object::decref() {
     return *this;
 }
 
-const object &object::clear() {
+const py::object &py::object::clear() {
     decref();
     ob = nullptr;
     return *this;
 }
 
-ssize_t object::refcnt() const {
+py::ssize_t py::object::refcnt() const {
     if (!is_nonnull()) {
         return -1;
     }
     return Py_REFCNT(ob);
 }
 
-nonnull<object> object::as_nonnull() const {
+py::nonnull<py::object> py::object::as_nonnull() const {
     if (!is_nonnull()) {
         throw pyutils::bad_nonnull();
     }
-    return nonnull<object>(ob);
+    return py::nonnull<py::object>(ob);
 }
 
 
-tmpref<object> object::as_tmpref() && {
-    tmpref<object> ret(ob);
+py::tmpref<py::object> py::object::as_tmpref() && {
+    py::tmpref<py::object> ret(ob);
     ob = nullptr;
     return std::move(ret);
 }

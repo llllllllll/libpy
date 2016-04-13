@@ -30,7 +30,7 @@ namespace py{
             */
             object(int len);
             object(std::size_t len);
-            object(ssize_t len);
+            object(py::ssize_t len);
 
             /**
                Constructor from `PyObject*`. If `pob` is not a `list` then
@@ -70,7 +70,7 @@ namespace py{
 
                @return The length of the object or -1 if an exception occured.
             */
-            ssize_t len() const;
+            py::ssize_t len() const;
 
             using py::object::operator[];
 
@@ -83,7 +83,7 @@ namespace py{
             // this is not a template because it is ambigious with the template
             // defined in the base class
             py::object operator[](int idx) const;
-            py::object operator[](ssize_t idx) const;
+            py::object operator[](py::ssize_t idx) const;
             py::object operator[](std::size_t idx) const;
 
 
@@ -127,7 +127,7 @@ namespace py{
             */
             template<typename I,
                      typename = std::enable_if_t<std::is_integral<I>::value>>
-            int setitem(ssize_t idx, const py::object &value) const {
+            int setitem(py::ssize_t idx, const py::object &value) const {
                 if (!is_nonnull()) {
                     pyutils::failed_null_check();
                     return -1;
@@ -189,26 +189,6 @@ namespace py{
             */
             tmpref<object> as_tmpref() &&;
         };
-
-
-        /**
-           Pack variadic arguments into a Python `list` object.
-
-           @param elems The elements to pack.
-           @return      The elements packed as a Python `list`.
-        */
-        template<typename... Ts>
-        tmpref<object> pack(const Ts&... elems) {
-            list::object l(0);
-            int status[] = { l.append(elems)... };
-            for (int st : status) {
-                if (st) {
-                    l.decref();
-                    return nullptr;
-                }
-            }
-            return l;
-        }
 
         /**
            The type of Python `list` objects.
@@ -297,8 +277,55 @@ namespace py{
 
            @return The length of the object or -1 if an exception occured.
         */
-        ssize_t len() const {
+        py::ssize_t len() const {
             return PyList_GET_SIZE(ob);
         }
+
+        /**
+           Get the object at `idx` without bounds checking.
+
+           If assignment is done to this value it is done without ref
+           counting or bounds checking, basically PyList_SET_ITEM.
+
+           @param idx The integer index into the list.
+           @return    A reference to object at index `idx`.
+        */
+        // this is not a template because it is ambigious with the template
+        // defined in the base class
+        py::object &operator[](int idx) const {
+            return ((py::object*) ((PyListObject*) ob)->ob_item)[idx];
+        }
+
+        py::object &operator[](py::ssize_t idx) const {
+            return ((py::object*) ((PyListObject*) ob)->ob_item)[idx];
+        }
+
+        py::object &operator[](std::size_t idx) const {
+            return ((py::object*) ((PyListObject*) ob)->ob_item)[idx];
+        }
     };
+
+    namespace list {
+        /**
+           Pack variadic arguments into a Python `list` object.
+
+           @param elems The elements to pack.
+           @return      The elements packed as a Python `list`.
+        */
+        template<typename... Ts>
+        tmpref<object> pack(const Ts&... elems) {
+            object l(sizeof...(elems));
+
+            if (!l.is_nonnull()) {
+                return nullptr;
+            }
+
+            py::nonnull<object> m = l.as_nonnull();
+            std::size_t n = 0;
+            for (const py::object &elem : { elems... }) {
+                m[n++] = elem;
+            }
+            return l;
+        }
+    }
 }

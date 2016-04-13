@@ -1,10 +1,9 @@
 #include "libpy/tuple.h"
 #include "libpy/utils.h"
 
-using namespace py;
-namespace t = tuple;
+namespace t = py::tuple;
 
-const type::object<t::object> t::type((PyObject*) &PyTuple_Type);
+const py::type::object<t::object> t::type((PyObject*) &PyTuple_Type);
 
 t::object::object() : py::object() {}
 
@@ -60,7 +59,7 @@ t::object::iterator t::object::end() const {
     return cend();
 }
 
-ssize_t t::object::len() const {
+py::ssize_t t::object::len() const {
     if (!is_nonnull()) {
         pyutils::failed_null_check();
         return -1;
@@ -76,7 +75,7 @@ py::object t::object::operator[](int idx) const {
     return PyTuple_GET_ITEM(ob, idx);
 }
 
-py::object t::object::operator[](ssize_t idx) const {
+py::object t::object::operator[](py::ssize_t idx) const {
     if (!is_nonnull()) {
         pyutils::failed_null_check();
         return nullptr;
@@ -93,7 +92,7 @@ py::object t::object::operator[](std::size_t idx) const {
 }
 
 
-nonnull<t::object> t::object::as_nonnull() const {
+py::nonnull<t::object> t::object::as_nonnull() const {
     if (!is_nonnull()) {
         throw pyutils::bad_nonnull();
     }
@@ -101,7 +100,7 @@ nonnull<t::object> t::object::as_nonnull() const {
 
 }
 
-tmpref<t::object> t::object::as_tmpref() && {
+py::tmpref<t::object> t::object::as_tmpref() && {
     tmpref<t::object> ret(ob);
     ob = nullptr;
     return std::move(ret);

@@ -6,28 +6,28 @@
 
 #include "libpy/libpy.h"
 
-using namespace py;
+using py::operator""_p;
 
 TEST(Tuple, type) {
-    ASSERT_EQ((PyObject*) tuple::type, (PyObject*) &PyTuple_Type);
+    ASSERT_EQ((PyObject*) py::tuple::type, (PyObject*) &PyTuple_Type);
 
     {
-        auto t = tuple::type();
+        auto t = py::tuple::type();
 
         EXPECT_EQ((PyObject*) t.type(), (PyObject*) &PyTuple_Type);
-        EXPECT_TRUE((t == tuple::pack()).istrue());
+        EXPECT_TRUE((t == py::tuple::pack()).istrue());
     }
     {
-        auto t = tuple::type(tuple::pack(0_p, 1_p));
+        auto t = py::tuple::type(py::tuple::pack(0_p, 1_p));
 
         EXPECT_EQ((PyObject*) t.type(), (PyObject*) &PyTuple_Type);
-        EXPECT_TRUE((t == tuple::pack(0_p, 1_p)).istrue());
+        EXPECT_TRUE((t == py::tuple::pack(0_p, 1_p)).istrue());
     }
 }
 
 TEST(Tuple, object_indexing) {
-    std::array<object, 3> expected = {0_p, 1_p, 2_p};
-    auto ob = tuple::pack(0_p, 1_p, 2_p);
+    std::array<py::object, 3> expected = {0_p, 1_p, 2_p};
+    auto ob = py::tuple::pack(0_p, 1_p, 2_p);
 
     ASSERT_EQ(ob.len(), 3);
     for (const auto &n : expected) {
@@ -36,8 +36,8 @@ TEST(Tuple, object_indexing) {
 }
 
 TEST(Tuple, ssize_t_indexing) {
-    std::array<object, 3> expected = {0_p, 1_p, 2_p};
-    auto ob = tuple::pack(0_p, 1_p, 2_p);
+    std::array<py::object, 3> expected = {0_p, 1_p, 2_p};
+    auto ob = py::tuple::pack(0_p, 1_p, 2_p);
 
     ASSERT_EQ(ob.len(), 3);
     for (ssize_t n : {0, 1, 2}) {
@@ -46,13 +46,13 @@ TEST(Tuple, ssize_t_indexing) {
 }
 
 TEST(Tuple, iteration) {
-    std::array<object, 3> expected = {0_p, 1_p, 2_p};
-    auto ob = tuple::pack(0_p, 1_p, 2_p);
+    std::array<py::object, 3> expected = {0_p, 1_p, 2_p};
+    auto ob = py::tuple::pack(0_p, 1_p, 2_p);
     std::size_t n = 0;
 
     ASSERT_EQ(ob.len(), 3);
     for (const auto &e : ob) {
-        ASSERT_TRUE((std::is_same<decltype(e), const object&>::value)) <<
+        ASSERT_TRUE((std::is_same<decltype(e), const py::object&>::value)) <<
             "const iteration over ob does not yield correct type";
 
         EXPECT_TRUE(e.is(expected[n++]));

@@ -7,16 +7,16 @@
 
 #include "libpy/libpy.h"
 
-using namespace py;
+using py::operator""_p;
 
 TEST(Layout, py_object) {
-    EXPECT_TRUE(std::is_standard_layout<object>::value);
-    EXPECT_EQ(sizeof(object), sizeof(PyObject*));
+    EXPECT_TRUE(std::is_standard_layout<py::object>::value);
+    EXPECT_EQ(sizeof(py::object), sizeof(PyObject*));
 }
 
 class Object : public testing::Test {
 protected:
-    object C;
+    py::object C;
 
     Object() : C(nullptr) {}
 
@@ -36,14 +36,14 @@ protected:
 
 TEST_F(Object, ostream_nonnull) {
     std::stringstream stream;
-    std::unordered_map<std::string, object> subtests = {{"c", 'c'_p},
-                                                        {"1", 1_p},
-                                                        {"1.5", 1.5_p},
-                                                        {"test", "test"_p}};
+    std::unordered_map<std::string, py::object> subtests = {{"c", 'c'_p},
+                                                            {"1", 1_p},
+                                                            {"1.5", 1.5_p},
+                                                            {"test", "test"_p}};
 
     for (const auto &kv : subtests) {
         for (const auto &as_nonnull : {false, true}) {
-            object ob = std::get<1>(kv);
+            py::object ob = std::get<1>(kv);
             if (!as_nonnull) {
                 stream << ob;
             } else {
@@ -58,14 +58,14 @@ TEST_F(Object, ostream_nonnull) {
 
 TEST_F(Object, ostream_nullptr) {
     std::stringstream stream;
-    stream << object(nullptr);
+    stream << py::object(nullptr);
     EXPECT_EQ(stream.str(), "<NULL>");
 }
 
 TEST_F(Object, hasattr) {
-    object ob = "test"_p;
-    object attrs = ob.dir().iter();
-    tmpref<object> attr;
+    py::object ob = "test"_p;
+    py::object attrs = ob.dir().iter();
+    py::tmpref<py::object> attr;
 
     while ((attr = attrs.next())) {
         EXPECT_TRUE(ob.hasattr(attr));
@@ -78,9 +78,9 @@ TEST_F(Object, hasattr) {
 }
 
 TEST_F(Object, getattr) {
-    object ob = "test"_p;
-    object attrs = ob.dir().iter();
-    tmpref<object> attr;
+    py::object ob = "test"_p;
+    py::object attrs = ob.dir().iter();
+    py::tmpref<py::object> attr;
 
     while ((attr = attrs.next())) {
         EXPECT_NE((PyObject*) ob.getattr(attr), nullptr);
