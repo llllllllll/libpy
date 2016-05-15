@@ -22,6 +22,10 @@ t::object::object(t::object &&mvfrom) noexcept :
     mvfrom.ob = nullptr;
 }
 
+t::object::object(size_t len) : py::object(PyTuple_New(len)) {}
+
+t::object::object(py::ssize_t len) : py::object(PyTuple_New(len)) {}
+
 void t::object::tuple_check() {
     if (ob && !PyTuple_Check(ob)) {
         ob = nullptr;
