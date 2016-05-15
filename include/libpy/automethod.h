@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <cstdint>
 #include <tuple>
 
 #include <Python.h>
@@ -8,7 +9,6 @@
 #include "libpy/utils.h"
 
 namespace pyutils {
-
     /**
        The format character for the given type. The default case is left
        unitialized to generate a compile-time error if you attempt to use
@@ -30,16 +30,28 @@ namespace pyutils {
     constexpr char typeformat<unsigned char> = 'b';
 
     template<>
-    constexpr char typeformat<unsigned short> = 'h';
+    constexpr char typeformat<short> = 'h';
+
+    template<>
+    constexpr char typeformat<unsigned short> = 'H';
 
     template<>
     constexpr char typeformat<int> = 'i';
+
+    template<>
+    constexpr char typeformat<unsigned int> = 'I';
 
     template<>
     constexpr char typeformat<long> = 'l';
 
     template<>
     constexpr char typeformat<unsigned long> = 'k';
+
+    template<>
+    constexpr char typeformat<long long> = 'L';
+
+    template<>
+    constexpr char typeformat<unsigned long long> = 'K';
 
     template<>
     constexpr char typeformat<float> = 'f';
