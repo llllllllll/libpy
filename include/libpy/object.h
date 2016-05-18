@@ -884,7 +884,8 @@ namespace py {
 
     namespace iter {
         template<typename T>
-        class iterator : public std::iterator<std::input_iterator_tag, T, void> {
+        class iterator :
+            public std::iterator<std::input_iterator_tag, T, void> {
         private:
             ownedref<object> it;
             tmpref<object> last;
@@ -940,10 +941,10 @@ namespace py {
             iterator &operator++() {
                 if (it.is_nonnull()) {
                     last.decref();
-                    last = std::move(it.next());
+                    last = it.next();
                     if (!last.is_nonnull()) {
                         it.decref();
-                        it = std::move(ownedref<object>(nullptr));
+                        it.ob = nullptr;
                     }
                 }
                 return *this;

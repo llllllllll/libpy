@@ -39,8 +39,8 @@ namespace py{
             object(const object &cpfrom);
             object(object &&mvfrom) noexcept;
 
-            object(size_t len);
-            object(py::ssize_t len);
+            explicit object(size_t len);
+            explicit object(py::ssize_t len);
 
             using py::object::operator=;
 
