@@ -8,3 +8,4 @@ html/*
 scratch.cc
 *.o
 *.so*
+*.d
