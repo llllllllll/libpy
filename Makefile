@@ -23,6 +23,12 @@ TESTRUNNER := test/run
 
 all: $(SONAME)
 
+local-install: $(SONAME)
+	cp $< ~/lib
+	@rm -f ~/lib/$(LIBRARY).so
+	ln -s ~/lib/$(SONAME) ~/lib/$(LIBRARY).so
+	cp -rf include/libpy ~/include
+
 $(SONAME): $(OBJECTS) $(HEADERS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -shared -Wl,-soname,$(SONAME) -o $(SONAME)
 	@touch $(LIBRARY).so
