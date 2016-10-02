@@ -3,6 +3,7 @@
 #include <type_traits>
 
 #include <libpy/object.h>
+#include <libpy/type.h>
 
 namespace py {
     namespace long_ {
@@ -190,6 +191,13 @@ namespace py {
         };
 
         /**
+           The type of Python `long` objects.
+
+           This is equivalent to: `long`.
+        */
+        extern const type::object<long_::object> type;
+
+        /**
            Check if an object is an instance of `int`.
 
            @param t The object to check
@@ -229,4 +237,19 @@ namespace py {
             return 1;
         }
     }
+}
+
+namespace pyutils {
+    template<typename T>
+    struct typeformat;
+
+    template<>
+    struct typeformat<py::long_::object> {
+        static char_sequence<'O'> cs;
+
+        template<typename T>
+        static inline auto make_arg(T &&t) {
+            return std::make_tuple(&PyLong_Type, std::forward<T>(t));
+        }
+    };
 }

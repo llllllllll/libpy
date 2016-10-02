@@ -15,61 +15,105 @@ namespace pyutils {
        auto method on a type that has no format character.
     */
     template<typename T>
-    constexpr char typeformat;
+    struct typeformat {
+    };
+
+    struct _default_make_arg {
+        template<typename T>
+        static inline auto make_arg(T &&t) {
+            return std::make_tuple(std::forward<T>(t));
+        }
+    };
 
     template<>
-    constexpr char typeformat<const char*> = 'z';
+    struct typeformat<const char*> : public _default_make_arg {
+        static char_sequence<'z'> cs;
+    };
 
     template<>
-    constexpr char typeformat<Py_buffer> = 's';
+    struct typeformat<Py_buffer> : public _default_make_arg {
+        static char_sequence<'s'> cs;
+    };
 
     template<>
-    constexpr char typeformat<char> = 'c';
+    struct typeformat<char> : public _default_make_arg {
+        static char_sequence<'c'> cs;
+    };
 
     template<>
-    constexpr char typeformat<unsigned char> = 'b';
+    struct typeformat<unsigned char> : public _default_make_arg {
+        static char_sequence<'b'> cs;
+    };
 
     template<>
-    constexpr char typeformat<short> = 'h';
+    struct typeformat<short> : public _default_make_arg {
+        static char_sequence<'h'> cs;
+    };
 
     template<>
-    constexpr char typeformat<unsigned short> = 'H';
+    struct typeformat<unsigned short> : public _default_make_arg {
+        static char_sequence<'H'> cs;
+    };
 
     template<>
-    constexpr char typeformat<int> = 'i';
+    struct typeformat<int> : public _default_make_arg {
+        static char_sequence<'i'> cs;
+    };
 
     template<>
-    constexpr char typeformat<unsigned int> = 'I';
+    struct typeformat<unsigned int> : public _default_make_arg {
+        static char_sequence<'I'> cs;
+    };
 
     template<>
-    constexpr char typeformat<long> = 'l';
+    struct typeformat<long> : public _default_make_arg {
+        static char_sequence<'l'> cs;
+    };
 
     template<>
-    constexpr char typeformat<unsigned long> = 'k';
+    struct typeformat<unsigned long> : public _default_make_arg {
+        static char_sequence<'k'> cs;
+    };
 
     template<>
-    constexpr char typeformat<long long> = 'L';
+    struct typeformat<long long> : public _default_make_arg {
+        static char_sequence<'L'> cs;
+    };
 
     template<>
-    constexpr char typeformat<unsigned long long> = 'K';
+    struct typeformat<unsigned long long> : public _default_make_arg {
+        static char_sequence<'K'> cs;
+    };
 
     template<>
-    constexpr char typeformat<float> = 'f';
+    struct typeformat<float> : public _default_make_arg {
+        static char_sequence<'f'> cs;
+    };
 
     template<>
-    constexpr char typeformat<double> = 'd';
+    struct typeformat<double> : public _default_make_arg {
+        static char_sequence<'d'> cs;
+    };
 
     template<>
-    constexpr char typeformat<Py_complex> = 'D';
+    struct typeformat<Py_complex> : public _default_make_arg {
+        static char_sequence<'D'> cs;
+    };
 
     template<>
-    constexpr char typeformat<PyObject*> = 'O';
+    struct typeformat<PyObject*> : public _default_make_arg {
+        static char_sequence<'O'> cs;
+    };
 
     template<>
-    constexpr char typeformat<py::object> = 'O';
+    struct typeformat<py::object> : public _default_make_arg {
+        static char_sequence<'O'> cs;
+    };
 
     template<>
-    constexpr char typeformat<bool> = 'p';
+    struct typeformat<bool> : public _default_make_arg {
+        static char_sequence<'p'> cs;
+    };
 
     /**
        Struct for extracting traits about the function being wrapped.
@@ -88,7 +132,21 @@ namespace pyutils {
         static constexpr auto flags = arity ? METH_VARARGS : METH_NOARGS;
 
         static inline auto fmtstr() {
-            return std::array<char, arity + 1> {typeformat<Args>..., '\0'};
+            return char_sequence_to_array(
+                char_sequence_cat(typeformat<Args>::cs...));
+        }
+
+        template<typename T>
+        static inline auto make_args(T &&t) {
+            return make_args_impl(std::forward<T>(t),
+                                  std::index_sequence_for<Args...>{});
+        }
+
+    private:
+        template<typename T, std::size_t... ns>
+        static inline auto make_args_impl(T &&t, std::index_sequence<ns...>) {
+            return std::tuple_cat(
+                typeformat<Args>::make_arg(std::get<ns>(t))...);
         }
     };
 
@@ -103,10 +161,11 @@ namespace pyutils {
         static inline PyObject *f(PyObject *self, PyObject *args) {
             using f = _function_traits<F>;
             typename f::parsed_args_type parsed_args;
+            const char *data = f::fmtstr().data();
 
             if (!apply(PyArg_ParseTuple,
                        std::tuple_cat(std::make_tuple(args, f::fmtstr().data()),
-                                      tuple_refs(parsed_args)))) {
+                                      f::make_args(tuple_refs(parsed_args))))) {
                 return nullptr;
             }
             return apply(impl,

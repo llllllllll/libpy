@@ -13,6 +13,8 @@ const py::long_::object &py::operator""_p(unsigned long long l) {
     return ob;
 }
 
+const py::type::object<py::long_::object> py::long_::type((PyObject*) &PyList_Type);
+
 py::long_::object::object() : py::object(nullptr) {}
 
 py::long_::object::object(PyObject *pob) : py::object(pob) {

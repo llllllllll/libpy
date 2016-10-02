@@ -89,4 +89,34 @@ namespace pyutils {
     PyObject *_to_pyobject(const T &a) {
         return (PyObject*) a;
     }
+
+    template<char... cs>
+    using char_sequence = std::integer_sequence<char, cs...>;
+
+    template<char... cs, char... ds>
+    constexpr auto _char_sequence_cat(char_sequence<cs...>,
+                                      char_sequence<ds...>) {
+        return char_sequence<cs..., ds...>{};
+    }
+
+    template<typename Cs>
+    constexpr auto char_sequence_cat(Cs cs) {
+        return cs;
+    }
+
+    template<typename Cs, typename Ds>
+    constexpr auto char_sequence_cat(Cs cs, Ds ds) {
+        return _char_sequence_cat(cs, ds);
+    }
+
+    template<typename Cs, typename Ds, typename... Ts>
+    constexpr auto char_sequence_cat(Cs cs, Ds ds, Ts... es) {
+        return _char_sequence_cat(_char_sequence_cat(cs, ds),
+                                  char_sequence_cat(es...));
+    }
+
+    template<char... cs>
+    constexpr auto char_sequence_to_array(char_sequence<cs...>) {
+        return std::array<char, sizeof...(cs) + 1> {cs..., '\0'};
+    }
 }

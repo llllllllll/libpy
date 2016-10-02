@@ -329,3 +329,18 @@ namespace py{
         }
     }
 }
+
+namespace pyutils {
+    template<typename T>
+    struct typeformat;
+
+    template<>
+    struct typeformat<py::list::object> {
+        static char_sequence<'O', '!'> cs;
+
+        template<typename T>
+        static inline auto make_arg(T &&t) {
+            return std::make_tuple(&PyList_Type, std::forward<T>(t));
+        }
+    };
+}
