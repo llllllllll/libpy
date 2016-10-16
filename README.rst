@@ -10,8 +10,8 @@ into the type system. This combined with method chaining and operator
 overloading should provide an experience much closer to writing python directly
 while still giving us the speed and control of C++.
 
-For example, lets look at the following code in Python and then see how to adapt
-this in ``libpy`` and the normal CPython API.
+For example, let's look at the following code in Python and then see how to
+write this in ``libpy`` versus the normal CPython API.
 
 .. code-block:: python
 
@@ -28,7 +28,7 @@ With ``libpy`` this is almost as expressive as python:
    }
 
 
-Here we see some of the features of ``libpy`` like user defined literals for
+Here we see some of the features of ``libpy``, like user defined literals for
 python types and operator overloading. We also see that we can write a normal
 expression without manually managing reference counts or explicit null checks.
 Compare that to the verbosity of the normal CPython API.
@@ -83,7 +83,7 @@ Compare that to the verbosity of the normal CPython API.
        Py_DECREF(tmpa);
        Py_DECREF(twopfive);
 
-       result;
+       return result;
    }
 
 
@@ -105,7 +105,7 @@ Tests
 -----
 
 The tests live in the ``test`` directory in the project root. These are broken
-into seperate files named ``test_*.cc``. The entry point lives in
+into separate files named ``test_*.cc``. The entry point lives in
 ``test/main.cc``. To build and run the tests run ``make test``.
 
 License
