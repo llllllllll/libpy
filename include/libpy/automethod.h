@@ -161,7 +161,6 @@ namespace pyutils {
         static inline PyObject *f(PyObject *self, PyObject *args) {
             using f = _function_traits<F>;
             typename f::parsed_args_type parsed_args;
-            const char *data = f::fmtstr().data();
 
             if (!apply(PyArg_ParseTuple,
                        std::tuple_cat(std::make_tuple(args, f::fmtstr().data()),
