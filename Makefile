@@ -48,7 +48,7 @@ test: $(TESTRUNNER)
 	@LD_LIBRARY_PATH=. $<
 
 $(TESTRUNNER): $(TEST_OBJECTS) $(SONAME)
-	$(CC) $(CFLAGS) -o $@ $(TEST_OBJECTS) \
+	$(CC) $(LDFLAGS) -o $@ $(TEST_OBJECTS) \
 		-L. -lpy -lgtest -lpthread -lpython$(PYTHON_LDVERSION)
 
 clean:
