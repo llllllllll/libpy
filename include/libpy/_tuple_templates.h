@@ -9,5 +9,5 @@
 */
 template<typename... Ts>
 tmpref<object> pack(const Ts&... elems) {
-    return PyTuple_Pack(sizeof...(Ts), ((PyObject*) elems)...);
+    return PyTuple_Pack(sizeof...(Ts), static_cast<PyObject*>(elems)...);
 }

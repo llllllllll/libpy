@@ -13,7 +13,8 @@ const py::long_::object &py::operator""_p(unsigned long long l) {
     return ob;
 }
 
-const py::type::object<py::long_::object> py::long_::type((PyObject*) &PyList_Type);
+const py::type::object<py::long_::object>
+py::long_::type(reinterpret_cast<PyObject*>(&PyList_Type));
 
 py::long_::object::object() : py::object(nullptr) {}
 
@@ -26,10 +27,10 @@ py::long_::object::object(const py::object &pob) : py::object(pob) {
 }
 
 py::long_::object::object(const py::long_::object &cpfrom) :
-    py::object((PyObject*) cpfrom) {}
+    py::object(cpfrom.ob) {}
 
 py::long_::object::object(py::long_::object &&mvfrom) noexcept :
-    py::object((PyObject*) mvfrom) {
+    py::object(mvfrom.ob) {
     mvfrom.ob = nullptr;
 }
 

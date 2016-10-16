@@ -5,22 +5,26 @@
 #include <Python.h>
 
 #include "libpy/libpy.h"
+#include "utils.h"
 
 using py::operator""_p;
 
 TEST(Tuple, type) {
-    ASSERT_EQ((PyObject*) py::tuple::type, (PyObject*) &PyTuple_Type);
+    ASSERT_EQ(static_cast<PyObject*>(py::tuple::type),
+              reinterpret_cast<PyObject*>(&PyTuple_Type));
 
     {
         auto t = py::tuple::type();
 
-        EXPECT_EQ((PyObject*) t.type(), (PyObject*) &PyTuple_Type);
+        EXPECT_EQ(static_cast<PyObject*>(t.type()),
+                  reinterpret_cast<PyObject*>(&PyTuple_Type));
         EXPECT_TRUE((t == py::tuple::pack()).istrue());
     }
     {
         auto t = py::tuple::type(py::tuple::pack(0_p, 1_p));
 
-        EXPECT_EQ((PyObject*) t.type(), (PyObject*) &PyTuple_Type);
+        EXPECT_EQ(static_cast<PyObject*>(t.type()),
+                  reinterpret_cast<PyObject*>(&PyTuple_Type));
         EXPECT_TRUE((t == py::tuple::pack(0_p, 1_p)).istrue());
     }
 }
@@ -31,7 +35,7 @@ TEST(Tuple, object_indexing) {
 
     ASSERT_EQ(ob.len(), 3);
     for (const auto &n : expected) {
-        EXPECT_EQ((PyObject*) ob[n], (PyObject*) n);
+        EXPECT_IS(ob[n], n);
     }
 }
 
@@ -55,7 +59,7 @@ TEST(Tuple, iteration) {
         ASSERT_TRUE((std::is_same<decltype(e), const py::object&>::value)) <<
             "const iteration over ob does not yield correct type";
 
-        EXPECT_TRUE(e.is(expected[n++]));
+        EXPECT_IS(e, expected[n++]);
     }
     EXPECT_EQ(n, 3) << "ran through too many iterations";
 }

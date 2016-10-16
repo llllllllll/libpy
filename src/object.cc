@@ -126,7 +126,7 @@ py::object py::object::type() const {
         pyutils::failed_null_check();
         return nullptr;
     }
-    return (PyObject*) Py_TYPE(ob);
+    return reinterpret_cast<PyObject*>(Py_TYPE(ob));
 }
 
 ssize_t py::object::len() const {

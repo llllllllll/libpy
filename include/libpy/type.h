@@ -31,7 +31,7 @@ namespace py {
             template<typename... Ts>
             tmpref<Instance> operator()(const Ts&... args) const {
                 py::object ret(py::object::operator()(args...));
-                return (PyObject*) ret;
+                return static_cast<PyObject*>(ret);
             }
         };
     }

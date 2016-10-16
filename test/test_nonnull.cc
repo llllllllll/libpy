@@ -1,9 +1,10 @@
 #include <gtest/gtest.h>
 
 #include "libpy/object.h"
+#include "utils.h"
 
 TEST(NonNull, test_good_nonnull) {
-    EXPECT_EQ((PyObject*) py::None.as_nonnull(), (PyObject*) py::None) <<
+    EXPECT_IS(py::None.as_nonnull(), py::None) <<
         "None.as_nonnull() should wrap the same object as None";
 
     EXPECT_TRUE(py::None.as_nonnull().is_nonnull());

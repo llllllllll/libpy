@@ -16,6 +16,14 @@ namespace py{
                correctly raise a python exception otherwies.
             */
             void tuple_check();
+        protected:
+            /**
+               Convert a nonnull tuple into a raw C array of objects.
+            */
+            inline py::object *as_array() const {
+            return reinterpret_cast<py::object*>(
+                reinterpret_cast<PyTupleObject* const>(ob)->ob_item);
+            }
         public:
             friend class py::tmpref<object>;
 
@@ -127,7 +135,7 @@ namespace py{
                     pyutils::failed_null_check();
                     return -1;
                 }
-                PyTuple_SET_ITEM(ob, idx, (PyObject*) value);
+                PyTuple_SET_ITEM(ob, idx, value);
                 return 0;
             }
 
@@ -149,7 +157,7 @@ namespace py{
                     pyutils::failed_null_check();
                     return -1;
                 }
-                return PyTuple_SetItem(ob, idx, (PyObject*) value);
+                return PyTuple_SetItem(ob, idx, value);
             }
 
             /**
@@ -196,7 +204,7 @@ namespace py{
                 pyutils::failed_null_check();
                 return -1;
             }
-            return PyTuple_Check((PyObject*) t);
+            return PyTuple_Check(t);
         }
 
         inline int check(const nonnull<object>&) {
@@ -216,7 +224,7 @@ namespace py{
                 pyutils::failed_null_check();
                 return -1;
             }
-            return PyTuple_CheckExact((PyObject*) t);
+            return PyTuple_CheckExact(t);
         }
 
         inline int checkexact(const nonnull<object>&) {
@@ -241,7 +249,7 @@ namespace py{
         friend class object;
 
         nonnull(const nonnull &cpfrom) : tuple::object(cpfrom) {}
-        nonnull(nonnull &&mvfrom) noexcept : tuple::object((PyObject*) mvfrom) {
+        nonnull(nonnull &&mvfrom) noexcept : tuple::object(mvfrom.ob) {
             mvfrom.ob = nullptr;
         }
 

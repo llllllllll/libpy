@@ -16,6 +16,14 @@ namespace py{
                correctly raise a python exception otherwies.
             */
             void list_check();
+        protected:
+            /**
+               Convert a nonnull list into a raw C array of objects.
+            */
+            inline py::object *as_array() const {
+            return reinterpret_cast<py::object*>(
+                reinterpret_cast<PyListObject* const>(ob)->ob_item);
+        }
         public:
             friend class py::tmpref<object>;
 
@@ -132,7 +140,7 @@ namespace py{
                     pyutils::failed_null_check();
                     return -1;
                 }
-                PyList_SET_ITEM(ob, idx, (PyObject*) value);
+                PyList_SET_ITEM(ob, idx, value);
                 return 0;
             }
 
@@ -154,7 +162,7 @@ namespace py{
                     pyutils::failed_null_check();
                     return -1;
                 }
-                return PyList_SetItem(ob, idx, (PyObject*) value);
+                return PyList_SetItem(ob, idx, value);
             }
 
             /**
@@ -169,7 +177,7 @@ namespace py{
                     pyutils::failed_null_check();
                     return -1;
                 }
-                return PyList_Append((PyObject*) *this, elem);
+                return PyList_Append(*this, elem);
             }
 
             /**
@@ -210,7 +218,7 @@ namespace py{
                 pyutils::failed_null_check();
                 return -1;
             }
-            return PyList_Check((PyObject*) t);
+            return PyList_Check(t);
         }
 
         inline int check(const nonnull<object>&) {
@@ -230,7 +238,7 @@ namespace py{
                 pyutils::failed_null_check();
                 return -1;
             }
-            return PyList_CheckExact((PyObject*) t);
+            return PyList_CheckExact(t);
         }
 
         inline int checkexact(const nonnull<object>&) {
@@ -250,12 +258,11 @@ namespace py{
     protected:
         nonnull() = delete;
         explicit nonnull(PyObject *ob) : list::object(ob) {}
-
     public:
         friend class object;
 
         nonnull(const nonnull &cpfrom) : list::object(cpfrom) {}
-        nonnull(nonnull &&mvfrom) noexcept : list::object((PyObject*) mvfrom) {
+        nonnull(nonnull &&mvfrom) noexcept : list::object(mvfrom.ob) {
             mvfrom.ob = nullptr;
         }
 
@@ -293,15 +300,15 @@ namespace py{
         // this is not a template because it is ambigious with the template
         // defined in the base class
         py::object &operator[](int idx) const {
-            return ((py::object*) ((PyListObject*) ob)->ob_item)[idx];
+            return as_array()[idx];
         }
 
         py::object &operator[](py::ssize_t idx) const {
-            return ((py::object*) ((PyListObject*) ob)->ob_item)[idx];
+            return as_array()[idx];
         }
 
         py::object &operator[](std::size_t idx) const {
-            return ((py::object*) ((PyListObject*) ob)->ob_item)[idx];
+            return as_array()[idx];
         }
     };
 
@@ -325,7 +332,7 @@ namespace py{
             for (const py::object &elem : { elems... }) {
                 m[n++] = elem;
             }
-            return l;
+            return std::move(l);
         }
     }
 }

@@ -3,7 +3,8 @@
 
 namespace t = py::tuple;
 
-const py::type::object<t::object> t::type((PyObject*) &PyTuple_Type);
+const py::type::object<t::object>
+t::type(reinterpret_cast<PyObject*>(&PyTuple_Type));
 
 t::object::object() : py::object() {}
 
@@ -15,10 +16,9 @@ t::object::object(const py::object &pob) : py::object(pob) {
     tuple_check();
 }
 
-t::object::object(const t::object &cpfrom) : py::object((PyObject*) cpfrom) {}
+t::object::object(const t::object &cpfrom) : py::object(cpfrom.ob) {}
 
-t::object::object(t::object &&mvfrom) noexcept :
-    py::object((PyObject*) mvfrom) {
+t::object::object(t::object &&mvfrom) noexcept : py::object(mvfrom.ob) {
     mvfrom.ob = nullptr;
 }
 
@@ -42,7 +42,7 @@ t::object::const_iterator t::object::cbegin() const {
     }
     // it is safe to cast a PyObject* to a py::object because it has standard
     // layout and only a single field
-    return (const py::object*) &((PyTupleObject*) ob)->ob_item[0];
+    return as_array();
 }
 
 t::object::const_iterator t::object::cend() const {
@@ -52,7 +52,7 @@ t::object::const_iterator t::object::cend() const {
 
     // it is safe to cast a PyObject* to a py::object because it has standard
     // layout and only a single field
-    return (const py::object*) &((PyTupleObject*) ob)->ob_item[Py_SIZE(ob)];
+    return &as_array()[Py_SIZE(ob)];
 }
 
 t::object::iterator t::object::begin() const {;

@@ -210,7 +210,7 @@ namespace py {
                 pyutils::failed_null_check();
                 return -1;
             }
-            return PyLong_Check((PyObject*) t);
+            return PyLong_Check(t);
         }
 
         inline int check(const nonnull<object>&) {
@@ -230,7 +230,7 @@ namespace py {
                 pyutils::failed_null_check();
                 return -1;
             }
-            return PyLong_CheckExact((PyObject*) t);
+            return PyLong_CheckExact(t);
         }
 
         inline int checkexact(const nonnull<object>&) {

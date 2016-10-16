@@ -3,7 +3,8 @@
 
 namespace l = py::list;
 
-const py::type::object<l::object> l::type((PyObject*) &PyList_Type);
+const py::type::object<l::object>
+l::type(reinterpret_cast<PyObject*>(&PyList_Type));
 
 l::object::object() : py::object() {}
 
@@ -21,10 +22,9 @@ l::object::object(const py::object &pob) : py::object(pob) {
     list_check();
 }
 
-l::object::object(const l::object &cpfrom) : py::object((PyObject*) cpfrom) {}
+l::object::object(const l::object &cpfrom) : py::object(cpfrom.ob) {}
 
-l::object::object(l::object &&mvfrom) noexcept :
-    py::object((PyObject*) mvfrom) {
+l::object::object(l::object &&mvfrom) noexcept : py::object(mvfrom.ob) {
     mvfrom.ob = nullptr;
 }
 
@@ -33,7 +33,7 @@ void l::object::list_check() {
         ob = nullptr;
         if (!PyErr_Occurred()) {
             PyErr_SetString(PyExc_TypeError,
-                            "cannot make py::lisl::object from non list");
+                            "cannot make py::list::object from non list");
         }
     }
 }
@@ -44,7 +44,7 @@ l::object::const_iterator l::object::cbegin() const {
     }
     // it is safe to cast a PyObject* to a py::object because it has standard
     // layout and only a single field
-    return (const py::object*) ((PyListObject*) ob)->ob_item;
+    return as_array();
 }
 
 l::object::const_iterator l::object::cend() const {
@@ -54,7 +54,7 @@ l::object::const_iterator l::object::cend() const {
 
     // it is safe to cast a PyObject* to a py::object because it has standard
     // layout and only a single field
-    return (const py::object*) &((PyListObject*) ob)->ob_item[Py_SIZE(ob)];
+    return &as_array()[Py_SIZE(ob)];
 }
 
 l::object::iterator l::object::begin() const {;
@@ -109,5 +109,5 @@ py::nonnull<l::object> l::object::as_nonnull() const {
 py::tmpref<l::object> l::object::as_tmpref() && {
     tmpref<l::object> ret(ob);
     ob = nullptr;
-    return std::move(ret);
+    return ret;
 }

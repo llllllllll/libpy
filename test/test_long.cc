@@ -12,7 +12,7 @@ using py::operator""_p;
 TEST(Long, default) {
     py::long_::object n;
 
-    EXPECT_EQ((PyObject*) n, nullptr);
+    EXPECT_IS(n, nullptr);
     EXPECT_FALSE(PyErr_Occurred());
 }
 

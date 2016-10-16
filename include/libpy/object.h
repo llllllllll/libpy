@@ -81,7 +81,7 @@ namespace py {
         }
 
         nonnull<T> &operator=(nonnull &&mvfrom) noexcept {
-            this.ob = mvfrom.ob;
+            this->ob = mvfrom.ob;
             mvfrom.ob = nullptr;
             return *this;
         }
@@ -184,7 +184,7 @@ namespace py {
             mvfrom.ob = nullptr;
         }
 
-        ownedref(T &&mvfrom) : T((PyObject*) mvfrom) {
+        ownedref(T &&mvfrom) : T(static_cast<PyObject*>(mvfrom)) {
             mvfrom.ob = nullptr;
         }
 
@@ -892,7 +892,7 @@ namespace py {
 
         protected:
             iterator(T &&t)
-                : it((PyObject*) t), last(std::move(it.next())) {
+                : it(t), last(std::move(it.next())) {
                 if (!last.is_nonnull()) {
                     it.ob = nullptr;
                 }
@@ -922,8 +922,8 @@ namespace py {
             }
 
             bool operator==(const iterator &other) const {
-                return (PyObject*) it == nullptr &&
-                    (PyObject*) other.it == nullptr;
+                return !(static_cast<PyObject*>(it) ||
+                         static_cast<PyObject*>(other.it));
             }
 
             bool operator!=(const iterator &other) const {

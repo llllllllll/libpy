@@ -5,14 +5,17 @@
 #include <Python.h>
 
 #include "libpy/libpy.h"
+#include "utils.h"
 
 using py::operator""_p;
 
 TEST(List, type) {
-    ASSERT_EQ((PyObject*) py::list::type, (PyObject*) &PyList_Type);
+    ASSERT_EQ(static_cast<PyObject*>(py::list::type),
+              reinterpret_cast<PyObject*>(&PyList_Type));
     auto t = py::list::type();
 
-    EXPECT_EQ((PyObject*) t.type(), (PyObject*) &PyList_Type);
+    EXPECT_EQ(static_cast<PyObject*>(t.type()),
+              reinterpret_cast<PyObject*>(&PyList_Type));
 }
 
 TEST(List, object_indexing) {
@@ -21,7 +24,7 @@ TEST(List, object_indexing) {
 
     ASSERT_EQ(ob.len(), 3);
     for (const auto &n : expected) {
-        EXPECT_EQ((PyObject*) ob[n], (PyObject*) n);
+        EXPECT_IS(ob[n], n);
     }
 }
 
@@ -45,7 +48,7 @@ TEST(List, iteration) {
         ASSERT_TRUE((std::is_same<decltype(e), const py::object&>::value)) <<
             "const iteration over ob does not yield correct type";
 
-        EXPECT_TRUE(e.is(expected[n++]));
+        EXPECT_IS(e, expected[n++]);
     }
     EXPECT_EQ(n, 3) << "ran through too many iterations";
 }

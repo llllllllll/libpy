@@ -6,6 +6,7 @@
 #include <Python.h>
 
 #include "libpy/libpy.h"
+#include "utils.h"
 
 using py::operator""_p;
 
@@ -83,12 +84,12 @@ TEST_F(Object, getattr) {
     py::tmpref<py::object> attr;
 
     while ((attr = attrs.next())) {
-        EXPECT_NE((PyObject*) ob.getattr(attr), nullptr);
+        EXPECT_IS_NOT(ob.getattr(attr), nullptr);
     }
     ASSERT_FALSE(PyErr_Occurred());
 
     for (const auto &attr : {"invalid1"_p, "invalid2"_p}) {
-        EXPECT_EQ((PyObject*) ob.getattr(attr), nullptr);
+        EXPECT_IS(ob.getattr(attr), nullptr);
         PyErr_Clear();
     }
 }
@@ -97,7 +98,7 @@ TEST_F(Object, setattr_delattr) {
     ASSERT_FALSE(this->C.hasattr("test"_p));
     ASSERT_EQ(this->C.setattr("test"_p, 1_p), 0);
     EXPECT_TRUE(this->C.hasattr("test"_p));
-    EXPECT_EQ((PyObject*) this->C.getattr("test"_p), (PyObject*) 1_p);
+    EXPECT_IS(this->C.getattr("test"_p), 1_p);
     ASSERT_EQ(this->C.delattr("test"_p), 0);
     EXPECT_FALSE(this->C.hasattr("test"_p));
 }
