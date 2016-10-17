@@ -5,7 +5,7 @@
 
 #include "libpy/utils.h"
 
-#define HAVE_MATMUL (PY_VERSION_HEX >= 0x03500000)
+#define LIBPY_HAVE_MATMUL (PY_VERSION_HEX >= 0x03500000)
 
 /**
    A namespace to hold all of the C++ adapted CPython API types, functions, and
@@ -640,7 +640,7 @@ public:
         return ob_binary_func<PyNumber_Multiply>(other);
     }
 
-#if CPP_HAVE_MATMUL
+#if LIBPY_HAVE_MATMUL
     template<typename T>
     tmpref<object> matmul(const T &other) const {
         return ob_binary_func<PyNumber_MatrixMultiple>(other);

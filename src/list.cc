@@ -1,10 +1,11 @@
 #include "libpy/list.h"
 #include "libpy/utils.h"
 
+namespace {
 namespace l = py::list;
+}
 
-const py::type::object<l::object>
-l::type(reinterpret_cast<PyObject*>(&PyList_Type));
+const py::type::object<l::object> l::type(&PyList_Type);
 
 l::object::object() : py::object() {}
 

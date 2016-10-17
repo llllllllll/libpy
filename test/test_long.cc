@@ -13,7 +13,7 @@ TEST(Long, default) {
     py::long_::object n;
 
     EXPECT_IS(n, nullptr);
-    EXPECT_FALSE(PyErr_Occurred());
+    EXPECT_EQ(PyErr_Occurred(), nullptr) << py::err::occurred();
 }
 
 #define FROM_NUMERIC_TEST_BASE(type) {                          \
