@@ -2,7 +2,9 @@ CC := g++
 MAJOR_VERSION := 1
 MINOR_VERSION := 0
 MICRO_VERSION := 0
-CFLAGS := -std=gnu++14 -Wall -Wextra -O3 -g -fno-strict-aliasing `python-config --cflags`
+# strict-prototypes is for C/ObjC only:
+CFLAGS := -std=gnu++14 -Wall -Wextra -O3 -g -fno-strict-aliasing \
+	`python-config --cflags | sed s/"-Wstrict-prototypes"//g`
 LDFLAGS := `python-config --ldflags`
 SOURCES :=$(wildcard src/*.cc)
 OBJECTS :=$(SOURCES:.cc=.o)
