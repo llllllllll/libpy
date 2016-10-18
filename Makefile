@@ -7,9 +7,7 @@ LDFLAGS := `python-config --ldflags`
 SOURCES :=$(wildcard src/*.cc)
 OBJECTS :=$(SOURCES:.cc=.o)
 DFILES := $(SOURCES:.cc=.d)
-PYTHON_INCLUDE := $(shell etc/which_py_include)
-PYTHON_LDVERSION := $(shell etc/which_py_so)
-INCLUDE_DIRS := include/ $(PYTHON_INCLUDE)
+INCLUDE_DIRS := include/
 INCLUDE := $(foreach d,$(INCLUDE_DIRS), -I$d)
 LIBRARY := libpy
 SONAME := $(LIBRARY).so.$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
@@ -49,7 +47,7 @@ test: $(TESTRUNNER)
 
 $(TESTRUNNER): $(TEST_OBJECTS) $(SONAME)
 	$(CC) $(LDFLAGS) -o $@ $(TEST_OBJECTS) \
-		-L. -lpy -lgtest -lpthread -lpython$(PYTHON_LDVERSION)
+		-L. -lpy -lgtest -lpthread
 
 clean:
 	@rm -f $(SONAME) $(LIBRARY).so $(OBJECTS) $(DFILES) \
