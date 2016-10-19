@@ -1,4 +1,5 @@
 #include <string>
+#include <cstdlib>
 #include <cxxabi.h>
 
 std::string demangle(const char *name) {

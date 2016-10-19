@@ -1,4 +1,0 @@
-#!/usr/bin/env python
-import distutils
-
-print(distutils.sysconfig_get_config_vars("LDVERSION")[0])
