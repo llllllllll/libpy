@@ -2,7 +2,7 @@
 #include <type_traits>
 #include <typeinfo>
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 #include "libpy/libpy.h"
 #include "utils.h"
@@ -53,7 +53,7 @@ FROM_FLOATING_TEST(double)
         for (const auto &n : {0, 1, std::is_unsigned<R>::value ? 2 : -1}) { \
             auto ob = py::long_::object(n).as_tmpref();                 \
                                                                         \
-            EXPECT_EQ(ob.method(), n);                                  \
+            EXPECT_EQ(ob.method(), static_cast<R>(n));                  \
             EXPECT_NO_PYTHON_ERR();                                     \
         }                                                               \
         for (const auto &n : {limits.min(), limits.max()}) {            \

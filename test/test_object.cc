@@ -2,7 +2,7 @@
 #include <type_traits>
 #include <unordered_map>
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 #include <Python.h>
 
 #include "libpy/libpy.h"

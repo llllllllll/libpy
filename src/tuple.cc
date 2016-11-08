@@ -107,5 +107,5 @@ py::nonnull<t::object> t::object::as_nonnull() const {
 py::tmpref<t::object> t::object::as_tmpref() && {
     tmpref<t::object> ret(ob);
     ob = nullptr;
-    return std::move(ret);
+    return ret;
 }

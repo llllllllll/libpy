@@ -1,6 +1,6 @@
 #include <type_traits>
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 #include "libpy/libpy.h"
 

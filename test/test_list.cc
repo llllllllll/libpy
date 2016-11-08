@@ -2,7 +2,7 @@
 #include <tuple>
 #include <typeinfo>
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 #include <Python.h>
 
 #include "libpy/libpy.h"
@@ -20,7 +20,7 @@ TEST(List, type) {
 }
 
 TEST(List, object_indexing) {
-    std::array<py::object, 3> expected = {0_p, 1_p, 2_p};
+    std::array<py::object, 3> expected({0_p, 1_p, 2_p});
     auto ob = py::list::pack(0_p, 1_p, 2_p);
 
     ASSERT_EQ(ob.len(), 3);
@@ -30,7 +30,7 @@ TEST(List, object_indexing) {
 }
 
 TEST(List, ssize_t_indexing) {
-    std::array<py::object, 3> expected = {0_p, 1_p, 2_p};
+    std::array<py::object, 3> expected({0_p, 1_p, 2_p});
     auto ob = py::list::pack(0_p, 1_p, 2_p);
 
     ASSERT_EQ(ob.len(), 3);
@@ -40,7 +40,7 @@ TEST(List, ssize_t_indexing) {
 }
 
 TEST(List, iteration) {
-    std::array<py::object, 3> expected = {0_p, 1_p, 2_p};
+    std::array<py::object, 3> expected({0_p, 1_p, 2_p});
     auto ob = py::list::pack(0_p, 1_p, 2_p);
     std::size_t n = 0;
 
@@ -51,5 +51,5 @@ TEST(List, iteration) {
 
         EXPECT_IS(e, expected[n++]);
     }
-    EXPECT_EQ(n, 3) << "ran through too many iterations";
+    EXPECT_EQ(n, 3u) << "ran through too many iterations";
 }

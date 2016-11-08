@@ -1,0 +1,94 @@
+language: cpp
+
+sudo: required
+
+matrix:
+  include:
+    - compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+            - deadsnakes
+            - ubuntu-toolchain-r-test
+          packages:
+            - python3.4-dev
+            - gcc-5
+            - g++-5
+      env: GCC=5 PYTHON=python3.4
+    - compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+            - deadsnakes
+            - ubuntu-toolchain-r-test
+          packages:
+            - python3.5-dev
+            - gcc-5
+            - g++-5
+      env: GCC=5 PYTHON=python3.5
+    - compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+            - deadsnakes
+            - ubuntu-toolchain-r-test
+          packages:
+            - python3.4-dev
+            - gcc-6
+            - g++-6
+      env: GCC=6 PYTHON=python3.4
+    - compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+            - deadsnakes
+            - ubuntu-toolchain-r-test
+          packages:
+            - python3.5-dev
+            - gcc-6
+            - g++-6
+      env: GCC=6 PYTHON=python3.5
+    - compiler: clang
+      os: linux
+      addons:
+        apt:
+          sources:
+            - deadsnakes
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.8
+          packages:
+            - python3.4-dev
+            - clang-3.8
+      env: CLANG=3.8 PYTHON=python3.4
+    - compiler: clang
+      os: linux
+      addons:
+        apt:
+          sources:
+            - deadsnakes
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.8
+          packages:
+            - python3.5-dev
+            - clang-3.8
+      env: CLANG=3.8 PYTHON=python3.5
+    - compiler: clang
+      os: osx
+
+install:
+  - if [ -n "$GCC" ];then export CXX="g++-$GCC" CC="gcc-$GCC";fi
+  - if [ -n "$CLANG" ];then export CXX="clang++-$CLANG" CC="clang-$CLANG";fi
+  - if [[ "$TRAVIS_OS_NAME" = "osx" ]];then brew install python3;fi
+
+before_script:
+  - ${CXX} --version
+
+script:
+  - make -j 8 test
+
+notifications:
+  email: false
