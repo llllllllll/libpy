@@ -18,7 +18,7 @@ class object : public py::object {
 private:
     /**
        Function called to verify that `ob` is an exception and
-       correctly raise a python exception otherwies.
+       correctly raise a python exception otherwise.
     */
     void exception_check();
 public:
@@ -59,7 +59,7 @@ public:
        @return Zero on success, non-zero on failure. This will raise a python
                exception on failure.
     */
-    int traceback(py::object tb) const;
+    int traceback(py::object tb);
 
     /**
        Get the context of the exception, set when an exception is raised
@@ -77,7 +77,7 @@ public:
        @param ctx The new context to set. Use `nullptr` to clear it. This steals
                   a reference to `ctx`.
     */
-    void context(py::object ctx) const;
+    void context(py::object ctx);
 
     /**
        Get the cause of the exception set by a `raise ... from ...`.
@@ -93,7 +93,7 @@ public:
        @param cs The new cause to set. Use `nullptr` to clear it. This steals a
                  reference to `cs`.
     */
-    void cause(py::object cs) const;
+    void cause(py::object cs);
 };
 
 typedef py::type::object<object> exctype;

@@ -82,8 +82,8 @@ void py::err::object::exception_check() {
     if (ob && !PyExceptionClass_Check(Py_TYPE(ob))) {
         ob = nullptr;
         if (!PyErr_Occurred()) {
-            PyErr_Format(TypeError,
-                         "cannot make py::err::object from non exception");
+            PyErr_SetString(TypeError,
+                            "cannot make py::err::object from non exception");
         }
     }
 }
@@ -96,7 +96,7 @@ py::tmpref<py::object> py::err::object::traceback() const {
     return PyException_GetTraceback(ob);
 }
 
-int py::err::object::traceback(py::object tb) const {
+int py::err::object::traceback(py::object tb) {
     if (!is_nonnull()) {
         pyutils::failed_null_check();
         return -1;
@@ -112,13 +112,12 @@ py::tmpref<py::object> py::err::object::context() const {
     return PyException_GetContext(ob);
 }
 
-void py::err::object::context(py::object tb) const {
+void py::err::object::context(py::object tb) {
     if (!is_nonnull()) {
         pyutils::failed_null_check();
+        return;
     }
-    else {
-        PyException_SetContext(ob, tb);
-    }
+    PyException_SetContext(ob, tb);
 }
 
 py::tmpref<py::object> py::err::object::cause() const {
@@ -129,13 +128,12 @@ py::tmpref<py::object> py::err::object::cause() const {
     return PyException_GetCause(ob);
 }
 
-void py::err::object::cause(py::object cs) const {
+void py::err::object::cause(py::object cs) {
     if (!is_nonnull()) {
         pyutils::failed_null_check();
+        return;
     }
-    else {
-        PyException_SetCause(ob, cs);
-    }
+    PyException_SetCause(ob, cs);
 }
 
 py::err::msgbuilder::msgbuilder(py::err::exctype type) :
