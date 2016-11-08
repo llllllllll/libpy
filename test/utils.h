@@ -21,13 +21,13 @@
    When this fails the exception is printed with PyErr_Print and then it is
    cleared.
 */
-#define EXPECT_NO_PYTHON_ERR() {                \
-        PyObject *occured = PyErr_Occurred();   \
-        EXPECT_FALSE(occured);                  \
-        if (occured) {                          \
-            PyErr_Print();                      \
-            PyErr_Clear();                      \
-        }                                       \
+#define EXPECT_NO_PYTHON_ERR() {                                        \
+        py::object occurred(PyErr_Occurred());                          \
+        EXPECT_FALSE(occurred) << "actually raised: " << occurred;      \
+        if (occured) {                                                  \
+            PyErr_Print();                                              \
+            PyErr_Clear();                                              \
+        }                                                               \
     }(void) 0
 
 /**
