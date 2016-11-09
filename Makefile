@@ -36,7 +36,7 @@ TEST_INCLUDE := -I test -I $(GTEST_DIR)/include
 TESTRUNNER := test/run
 
 
-.PHONY: all test clean gtest-install
+.PHONY: all test clean clean-gtest clean-all gtest-install
 
 all: $(SONAME)
 
@@ -91,4 +91,9 @@ clean:
 clean-gtest:
 	@rm -r $(GTEST_ROOT)
 
+clean-all: clean clean-gtest
+
 -include $(DFILES) $(TEST_DFILES)
+
+print-%:
+	@echo $* = $($*)
