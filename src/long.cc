@@ -91,7 +91,7 @@ py::nonnull<py::long_::object> py::long_::object::as_nonnull() const {
 py::tmpref<py::long_::object> py::long_::object::as_tmpref() && {
     py::tmpref<object> ret(ob);
     ob = nullptr;
-    return std::move(ret);
+    return ret;
 }
 
 py::tmpref<py::long_::object> py::long_::object::operator-() const {

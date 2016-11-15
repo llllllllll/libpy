@@ -166,7 +166,7 @@ py::object::iterator py::object::end() const {
 }
 
 py::object::const_iterator py::object::cbegin() const {
-    return std::move(py::object(ob_unary_func<PyObject_GetIter>()));
+    return py::object(ob_unary_func<PyObject_GetIter>());
 }
 
 py::object::const_iterator py::object::cend() const {
@@ -267,5 +267,5 @@ py::nonnull<py::object> py::object::as_nonnull() const {
 py::tmpref<py::object> py::object::as_tmpref() && {
     py::tmpref<py::object> ret(ob);
     ob = nullptr;
-    return std::move(ret);
+    return ret;
 }

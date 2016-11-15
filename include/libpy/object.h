@@ -142,7 +142,7 @@ public:
        @return A new `tmpref`.
     */
     tmpref as_tmpref() &&{
-        return std::move(*this);
+        return *this;
     }
 
     /**

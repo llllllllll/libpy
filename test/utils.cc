@@ -7,5 +7,5 @@ std::string demangle(const char *name) {
     char *cs = abi::__cxa_demangle(name, 0, 0, &status);
     std::string ret = cs;
     free(cs);
-    return std::move(ret);
+    return ret;
 }
