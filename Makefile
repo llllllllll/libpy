@@ -16,6 +16,8 @@ SONAME := $(LIBRARY).so.$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
 OS := $(shell uname)
 ifeq ($(OS),Darwin)
 	SONAME_FLAG := install_name
+	AR := libtool
+	ARFLAGS := -static -o
 else
 	SONAME_FLAG := soname
 endif
