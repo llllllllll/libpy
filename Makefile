@@ -4,7 +4,7 @@ MINOR_VERSION := 0
 MICRO_VERSION := 0
 # strict-prototypes is for C/ObjC only:
 CXXFLAGS := -std=gnu++14 -Wall -Wextra -O3 -g -fno-strict-aliasing \
-	$(shell $(PYTHON)-config --cflags | sed s/"-Wstrict-prototypes"//g)
+	$(shell $(PYTHON)-config --cflags | sed s/"-Wstrict-prototypes"//g) -Wno-missing-braces
 LDFLAGS := $(shell $(PYTHON)-config --ldflags)
 SOURCES :=$(wildcard src/*.cc)
 OBJECTS :=$(SOURCES:.cc=.o)
