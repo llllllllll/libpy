@@ -79,11 +79,17 @@ matrix:
     - compiler: clang
       os: osx
       osx_image: xcode8.1
+      env: PYTHON_VER=3.4.4
+    - compiler: clang
+      os: osx
+      osx_image: xcode8.1
+      env: PYTHON_VER=3.5.2
 
 install:
   - if [ -n "$GCC" ];then export CXX="g++-$GCC" CC="gcc-$GCC";fi
   - if [ -n "$CLANG" ];then export CXX="clang++-$CLANG" CC="clang-$CLANG";fi
-  - if [[ "$TRAVIS_OS_NAME" = "osx" ]];then wget https://www.python.org/ftp/python/3.5.2/python-3.5.2-macosx10.6.pkg && sudo installer -pkg python-3.5.2-macosx10.6.pkg -target /;fi
+  - export PYTHON_URL="https://www.python.org/ftp/python/$PYTHON_VER/python-$PYTHON_VER-macosx10.6.pkg"
+  - if [[ "$TRAVIS_OS_NAME" = "osx" ]];then wget "$PYTHON_URL" && sudo installer -pkg "python-$PYTHON_VER-macosx10.6.pkg" -target /;fi
 
 before_script:
   - ${CXX} --version
