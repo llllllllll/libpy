@@ -78,14 +78,18 @@ matrix:
       env: CLANG=3.8 PYTHON=python3.5
     - compiler: clang
       os: osx
+      osx_image: xcode8.1
 
 install:
   - if [ -n "$GCC" ];then export CXX="g++-$GCC" CC="gcc-$GCC";fi
   - if [ -n "$CLANG" ];then export CXX="clang++-$CLANG" CC="clang-$CLANG";fi
-  - if [[ "$TRAVIS_OS_NAME" = "osx" ]];then brew install python3;fi
+  - if [[ "$TRAVIS_OS_NAME" = "osx" ]];then wget https://www.python.org/ftp/python/3.5.2/python-3.5.2-macosx10.6.pkg && sudo installer -pkg python-3.5.2-macosx10.6.pkg -target /;fi
 
 before_script:
   - ${CXX} --version
+  - python --version
+  - python2 --version
+  - python3 --version
 
 script:
   - make -j 8 test
