@@ -65,6 +65,11 @@
     }(void) 0
 
 /**
+   Assertion that an object is not null.
+*/
+#define ASSERT_NONNULL(ob) ASSERT_NE(static_cast<PyObject*>(ob), nullptr)
+
+/**
    Demangle a name from typeid(T).name().
 
    @param name The name from typeid.

@@ -130,7 +130,7 @@ public:
     */
     template<typename I,
              typename = std::enable_if_t<std::is_integral<I>::value>>
-    int setitem(ssize_t idx, const py::object &value) const {
+    int setitem(I idx, const py::object &value) const {
         if (!is_nonnull()) {
             pyutils::failed_null_check();
             return -1;
@@ -199,7 +199,7 @@ extern const type::object<tuple::object> type;
             instance of `tuple`, -1 if an exception occured.
 */
 template<typename T>
-inline int check(const T &t) {
+inline int check(T t) {
     if (!t.is_nonnull()) {
         pyutils::failed_null_check();
         return -1;
@@ -219,7 +219,7 @@ inline int check(const nonnull<object>&) {
             instance of `tuple`, -1 if an exception occured.
 */
 template<typename T>
-inline int checkexact(const T &t) {
+inline int checkexact(T t) {
     if (!t.is_nonnull()) {
         pyutils::failed_null_check();
         return -1;
@@ -230,7 +230,33 @@ inline int checkexact(const T &t) {
 inline int checkexact(const nonnull<object>&) {
     return 1;
 }
+
+/**
+   Create a new tuple from another iterable object.
+
+   @param seq The sequence to create a tuple from.
+   @return A new tuple or nullptr.
+*/
+template<typename T>
+tmpref<object> from_iterable(T seq) {
+    if (!pyutils::is_nonnull(seq)) {
+        pyutils::failed_null_check();
+        return nullptr;
     }
+
+    tmpref<object> ob(seq.size());
+    ssize_t n = 0;
+
+    for (auto elem : seq) {
+        if (!elem.is_nonnull()) {
+            return nullptr;
+        }
+        ob.setitem(n++, elem.incref());
+    }
+
+    return ob;
+}
+}
 
 /**
    A `py::tuple::object` where `ob` is known to be nonnull.
