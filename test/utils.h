@@ -22,9 +22,9 @@
    cleared.
 */
 #define EXPECT_NO_PYTHON_ERR() {                                        \
-        py::object occurred(PyErr_Occurred());                          \
+        py::object occurred{PyErr_Occurred()};                          \
         EXPECT_FALSE(occurred) << "actually raised: " << occurred;      \
-        if (occured) {                                                  \
+        if (occurred) {                                                 \
             PyErr_Print();                                              \
             PyErr_Clear();                                              \
         }                                                               \
