@@ -1,10 +1,11 @@
 #include "libpy/tuple.h"
 #include "libpy/utils.h"
 
+namespace {
 namespace t = py::tuple;
+}
 
-const py::type::object<t::object>
-t::type(reinterpret_cast<PyObject*>(&PyTuple_Type));
+const py::type::object<t::object> t::type(&PyTuple_Type);
 
 t::object::object() : py::object() {}
 

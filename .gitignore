@@ -12,3 +12,6 @@ scratch.cc
 *.d
 
 gtest/*
+
+# etags
+TAGS

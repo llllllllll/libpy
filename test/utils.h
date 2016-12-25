@@ -3,6 +3,8 @@
 #include "gtest/gtest.h"
 #include <Python.h>
 
+#include "libpy/libpy.h"
+
 /**
    Expectation that two object are the same object in memory.
 */
@@ -19,28 +21,47 @@
    When this fails the exception is printed with PyErr_Print and then it is
    cleared.
 */
-#define EXPECT_NO_PYTHON_ERR() {                \
-        PyObject *occured = PyErr_Occurred();   \
-        EXPECT_FALSE(occured);                  \
-        if (occured) {                          \
-            PyErr_Print();                      \
-            PyErr_Clear();                      \
-        }                                       \
+#define EXPECT_NO_PYTHON_ERR() {                                        \
+        py::object occurred{PyErr_Occurred()};                          \
+        EXPECT_FALSE(occurred) << "actually raised: " << occurred;      \
+        if (occurred) {                                                 \
+            PyErr_Print();                                              \
+            PyErr_Clear();                                              \
+        }                                                               \
     }(void) 0
 
 /**
    Expectation that a particular kind of python exception was raised.
-
-   If the correct type was raised the exception is cleared.
+   Any exceptions are cleared after this.
 
    @param type The python exception class to check against.
 */
 #define EXPECT_PYTHON_ERR(type) {                       \
         bool matches = PyErr_ExceptionMatches(type);    \
         EXPECT_TRUE(matches);                           \
-        if (matches) {                                  \
-            PyErr_Clear();                              \
-        }                                               \
+        PyErr_Clear();                                  \
+    }(void) 0
+
+
+/**
+   Expectation that a particular kind of python exception was raised and that
+   the message matches some text.
+   Any exceptions are cleared after this.
+
+   @param type The python exception class to check against.
+   @param msg The message text to check for.
+*/
+#define EXPECT_PYTHON_ERR_MSG(type, msg) {                              \
+        bool matches = PyErr_ExceptionMatches(type);                    \
+        EXPECT_TRUE(matches);                                           \
+        PyObject *type_;                                                \
+        PyObject *value;                                                \
+        PyObject *tb;                                                   \
+        PyErr_Fetch(&type_, &value, &tb);                               \
+        EXPECT_TRUE((py::object(value).str() == msg).istrue());         \
+        Py_DECREF(type_);                                               \
+        Py_DECREF(value);                                               \
+        Py_XDECREF(tb);                                                 \
     }(void) 0
 
 /**

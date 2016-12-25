@@ -1,5 +1,6 @@
 #pragma once
 
+#include "libpy/err.h"
 #include "libpy/object.h"
 #include "libpy/tuple.h"
 #include "libpy/type.h"

@@ -18,6 +18,8 @@ public:
 
     object(PyObject *pob) : py::object(pob) {}
 
+    object(PyTypeObject *pob) : py::object(reinterpret_cast<PyObject*>(pob)) {}
+
     object(const object &cpfrom) : py::object(cpfrom.ob) {}
 
     object(object &&mvfrom) noexcept : py::object(mvfrom.ob) {

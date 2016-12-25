@@ -10,6 +10,6 @@ py::tmpref<py::object> f() {
 
 TEST(ReadMe, example) {
     auto ob = f();
+    EXPECT_TRUE((ob == 6.5_p).istrue());
     EXPECT_EQ(ob.refcnt(), 1);
-    EXPECT_TRUE((f() == 6.5_p).istrue());
 }
