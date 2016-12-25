@@ -138,7 +138,7 @@ void py::err::object::cause(py::object cs) {
 
 py::err::msgbuilder::msgbuilder(py::err::exctype type) :
     type(type), fire(true) {}
-py::err::msgbuilder::msgbuilder(msgbuilder &&mvfrom) :
+py::err::msgbuilder::msgbuilder(msgbuilder &&mvfrom) noexcept :
     std::stringstream(std::forward<msgbuilder>(mvfrom)), type(mvfrom.type) {
     mvfrom.fire = false;
 }

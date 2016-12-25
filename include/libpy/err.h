@@ -164,7 +164,7 @@ private:
 protected:
     friend msgbuilder raise(exctype type);
     msgbuilder(exctype type);
-    msgbuilder(msgbuilder &&type);
+    msgbuilder(msgbuilder &&type) noexcept;
 public:
     ~msgbuilder();
 };
