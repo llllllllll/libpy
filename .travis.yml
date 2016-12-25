@@ -1,10 +1,10 @@
 language: cpp
-
-sudo: required
+dist: trusty
+sudo: false
 
 matrix:
   include:
-    - compiler: gcc
+    - compiler: gcc-5
       os: linux
       addons:
         apt:
@@ -16,7 +16,7 @@ matrix:
             - gcc-5
             - g++-5
       env: GCC=5 PYTHON=python3.4
-    - compiler: gcc
+    - compiler: gcc-5
       os: linux
       addons:
         apt:
@@ -28,7 +28,7 @@ matrix:
             - gcc-5
             - g++-5
       env: GCC=5 PYTHON=python3.5
-    - compiler: gcc
+    - compiler: gcc-6
       os: linux
       addons:
         apt:
@@ -40,7 +40,7 @@ matrix:
             - gcc-6
             - g++-6
       env: GCC=6 PYTHON=python3.4
-    - compiler: gcc
+    - compiler: gcc-6
       os: linux
       addons:
         apt:
@@ -52,50 +52,53 @@ matrix:
             - gcc-6
             - g++-6
       env: GCC=6 PYTHON=python3.5
-    - compiler: clang
+    - compiler: clang-3.9
       os: linux
       addons:
         apt:
           sources:
             - deadsnakes
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.8
+            - sourceline: "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.9 main"
+              key_url: "http://apt.llvm.org/llvm-snapshot.gpg.key"
           packages:
+            # we install gcc in the clang builds to get an updated libstd++
+            - gcc-5
+            - g++-5
             - python3.4-dev
-            - clang-3.8
-      env: CLANG=3.8 PYTHON=python3.4
-    - compiler: clang
+            - clang-3.9
+      env: CLANG=3.9 PYTHON=python3.4
+    - compiler: clang-3.9
       os: linux
       addons:
         apt:
           sources:
             - deadsnakes
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.8
+            - sourceline: "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.9 main"
+              key_url: "http://apt.llvm.org/llvm-snapshot.gpg.key"
           packages:
+            # we install gcc in the clang builds to get an updated libstd++
+            - gcc-5
+            - g++-5
             - python3.5-dev
-            - clang-3.8
-      env: CLANG=3.8 PYTHON=python3.5
+            - clang-3.9
+      env: CLANG=3.9 PYTHON=python3.5
     - compiler: clang
       os: osx
       osx_image: xcode8.1
-      env: PYTHON_VER=3.4.4
+      env: PYTHON_VER=3.4.4 PYTHON=python3
     - compiler: clang
       os: osx
       osx_image: xcode8.1
-      env: PYTHON_VER=3.5.2
+      env: PYTHON_VER=3.5.2 PYTHON=python3
 
 install:
-  - if [ -n "$GCC" ];then export CXX="g++-$GCC" CC="gcc-$GCC";fi
-  - if [ -n "$CLANG" ];then export CXX="clang++-$CLANG" CC="clang-$CLANG";fi
-  - export PYTHON_URL="https://www.python.org/ftp/python/$PYTHON_VER/python-$PYTHON_VER-macosx10.6.pkg"
-  - if [[ "$TRAVIS_OS_NAME" = "osx" ]];then wget "$PYTHON_URL" && sudo installer -pkg "python-$PYTHON_VER-macosx10.6.pkg" -target /;fi
+  - source etc/ci-install.sh
 
 before_script:
   - ${CXX} --version
-  - python --version
-  - python2 --version
-  - python3 --version
+  - ${PYTHON} --version
 
 script:
   - make -j 8 test
