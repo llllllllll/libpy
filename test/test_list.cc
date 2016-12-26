@@ -53,3 +53,27 @@ TEST(List, iteration) {
     }
     EXPECT_EQ(n, 3u) << "ran through too many iterations";
 }
+
+TEST(List, from_iterable_non_pyobject) {
+    std::array<py::object, 3> expected({0_p, 1_p, 2_p});
+    auto ob = py::list::from_iterable(expected);
+    ASSERT_NONNULL(ob);
+
+    py::ssize_t n = 0;
+
+    for (const auto elem : ob) {
+        EXPECT_IS(elem, expected[n++]);
+    }
+}
+
+TEST(List, from_iterable_pyobject) {
+    auto expected = py::list::pack(0_p, 1_p, 2_p);
+    auto ob = py::list::from_iterable(expected);
+    ASSERT_NONNULL(ob);
+
+    py::ssize_t n = 0;
+
+    for (const auto elem : ob) {
+        EXPECT_IS(elem, expected[n++]);
+    }
+}

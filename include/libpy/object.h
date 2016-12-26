@@ -1,5 +1,6 @@
 #pragma once
 #include <ostream>
+#include <type_traits>
 
 #include <Python.h>
 
@@ -103,6 +104,9 @@ public:
 
     tmpref() : T(nullptr) {}
     tmpref(PyObject *pob) : T(pob) {}
+
+    // bring in our root type's constructors.
+    using T::T;
 
     /**
        Copy constructor for tmpref which increfs the input to make the
@@ -499,6 +503,18 @@ public:
        @return The length of the object or -1 if an exception occured.
     */
     ssize_t len() const;
+
+    /**
+       Get the length of the object.
+
+       This is equivalent to `len(this)`.
+       This alias exists to conform to the look more like a C++ container.
+
+       @return The length of the object or -1 if an exception occured.
+    */
+    inline ssize_t size() const {
+        return len();
+    }
 
     /**
        Get a hit at the length of the object. This does not need to match
@@ -994,4 +1010,25 @@ const object &operator""_p(long double d);
    @return       The new output stream.
 */
 std::ostream &operator<<(std::ostream &stream, const object &ob);
+}
+
+namespace pyutils {
+template<typename T, bool>
+struct _is_nonnull {
+    static bool f(const T&) {
+        return true;
+    }
+};
+
+template<typename T>
+struct _is_nonnull<T, true> {
+    static bool f(const T &t) {
+        return t.is_nonnull();
+    }
+};
+
+template<typename T>
+bool is_nonnull(const T &t) {
+    return _is_nonnull<T, std::is_base_of<py::object, T>::value>::f(t);
+}
 }

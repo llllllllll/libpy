@@ -135,7 +135,7 @@ public:
     */
     template<typename I,
              typename = std::enable_if_t<std::is_integral<I>::value>>
-    int setitem(py::ssize_t idx, const py::object &value) const {
+    int setitem(I idx, const py::object &value) const {
         if (!is_nonnull()) {
             pyutils::failed_null_check();
             return -1;
@@ -243,6 +243,32 @@ inline int checkexact(const T &t) {
 
 inline int checkexact(const nonnull<object>&) {
     return 1;
+}
+
+/**
+   Create a new list from another iterable object.
+
+   @param seq The sequence to create a list from.
+   @return A new tuple or nullptr.
+*/
+template<typename T>
+tmpref<object> from_iterable(T seq) {
+    if (!pyutils::is_nonnull(seq)) {
+        pyutils::failed_null_check();
+        return nullptr;
+    }
+
+    tmpref<object> ob(seq.size());
+    ssize_t n = 0;
+
+    for (auto elem : seq) {
+        if (!elem.is_nonnull()) {
+            return nullptr;
+        }
+        ob.setitem(n++, elem.incref());
+    }
+
+    return ob;
 }
 }
 
