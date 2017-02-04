@@ -1,6 +1,8 @@
 #pragma once
 
+#include <exception>
 #include <sstream>
+#include <type_traits>
 
 #include "libpy/object.h"
 #include "libpy/type.h"
@@ -198,6 +200,21 @@ msgbuilder raise(exctype type);
    Raise an exception value.
 */
 void raise(py::err::object err);
+
+/**
+   Raise a Python exception from a C++ exception and then throw the C++
+   exception.
+
+   @param exc The C++ exception to raise a Python exception from and throw.
+   @param type The type of Python exception to raise.
+*/
+template<typename T,
+         typename = std::enable_if_t<std::is_base_of<std::exception, T>::value>>
+[[noreturn]] void raise(T &&err, exctype type = RuntimeError) {
+    // we use a template to avoid converting to std::exception when we throw
+    raise(type) << err.what();
+    throw std::move(err);
+}
 
 /**
    Raise `py::err::MemoryError` and return `nullptr`.
