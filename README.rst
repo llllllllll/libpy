@@ -97,8 +97,7 @@ Building
 
 ``libpy`` is meant to be built as a shared object to be linked against by
 extension modules. To build ``libpy.so`` simply run ``make``. This requires a
-C++ compiler capable of building C++14 and has only been tested on GCC 5.3.0 on
-GNU+Linux.
+C++ compiler capable of building C++14, we recommend GCC.
 
 
 Tests
