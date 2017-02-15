@@ -93,6 +93,10 @@ constexpr auto _char_sequence_cat(char_sequence<cs...>,
     return char_sequence<cs..., ds...>{};
 }
 
+constexpr char_sequence<> char_sequence_cat() {
+    return char_sequence<>{};
+}
+
 template<typename Cs>
 constexpr auto char_sequence_cat(Cs cs) {
     return cs;

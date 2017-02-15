@@ -219,7 +219,7 @@ PyObject *_automethodwrapper(PyObject *self, PyObject *args) {
         METH_VARARGS,                                                   \
         doc,                                                            \
     })
-#define _libpy_named_automethod_2(name, f) _libpy_automethod_2(name, f, nullptr)
+#define _libpy_named_automethod_2(name, f) _libpy_named_automethod_3(name, f, nullptr)
 #define _libpy_named_automethod_dispatch(n, f, doc, macro, ...)  macro
 
     /**
@@ -248,8 +248,8 @@ PyObject *_automethodwrapper(PyObject *self, PyObject *args) {
                    the docstring will be `None`.
        @return     A `PyMethodDef` structure for the given function.
     */
-#define named_automethod(...)                                           \
+#define named_automethod(name, ...)                                     \
     _libpy_named_automethod_dispatch(name,##__VA_ARGS__,                \
-                                     _libpy_named_automethod_3(__VA_ARGS__),  \
-                                     _libpy_named_automethod_3(__VA_ARGS__))
+                                     _libpy_named_automethod_3(name, __VA_ARGS__), \
+                                     _libpy_named_automethod_2(name, __VA_ARGS__))
 }

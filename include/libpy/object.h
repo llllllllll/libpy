@@ -222,7 +222,7 @@ namespace iter {
    A wrapper around `PyObject*` to provide a C++ interface to the
    CPython API.
 */
-class object {
+class alignas(PyObject*) object {
 protected:
     /**
        The underlying `PyObject*`.
@@ -289,16 +289,20 @@ public:
 
        `ob` will be set the single argument.
     */
-    object(PyObject*);
-    object(const object&);
-    object(object&&) noexcept;
+    constexpr inline object(PyObject* ob) : ob(ob) {}
+    constexpr inline object(const object& cpfrom) : ob(cpfrom.ob) {}
+    constexpr inline object(object&& mvfrom) noexcept : ob(mvfrom.ob) {
+        mvfrom.ob = nullptr;
+    }
 
     /**
        Constructor that claims the reference from a tmpref.
 
        @param claimfrom The temporary reference to claim.
     */
-    object(tmpref<object> &&claimfrom) noexcept;
+    object(tmpref<object> &&mvfrom) noexcept : ob(mvfrom.ob) {
+        mvfrom.ob = nullptr;
+    }
 
     object &operator=(const object&);
     object &operator=(object&&) noexcept;

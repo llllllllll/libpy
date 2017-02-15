@@ -9,20 +9,6 @@ const py::object py::Ellipsis = Py_Ellipsis;
 const py::object py::True = Py_True;
 const py::object py::False = Py_False;
 
-py::object::object() : ob(nullptr) {}
-
-py::object::object(PyObject *pob) : ob(pob) {}
-
-py::object::object(const py::object &cpfrom) : ob(cpfrom.ob) {}
-
-py::object::object(py::object &&mvfrom) noexcept : ob(mvfrom.ob) {
-    mvfrom.ob = nullptr;
-}
-
-py::object::object(py::tmpref<py::object> &&mvfrom) noexcept : ob(mvfrom.ob) {
-    mvfrom.ob = nullptr;
-}
-
 const py::object &py::operator""_p(char c) {
     static std::unordered_map<char, py::object> cache;
     py::object &ob = cache[c];
